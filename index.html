@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#0d1014" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-<title>Padel Americano</title>
+<title>Padel Mexicano</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -212,6 +212,21 @@ nav.tabs button.on::before{
 .diff{font-size:11px;color:var(--txt-faint);font-weight:700;}
 .diff.pos{color:var(--win);}.diff.neg{color:var(--loss);}
 
+/* ---------- Rules ---------- */
+.lab-sec{font-size:12px;font-weight:900;letter-spacing:.16em;text-transform:uppercase;color:var(--txt-faint);margin:0 2px 11px;}
+.rules{overflow:hidden;}
+.rule{padding:15px 16px;border-bottom:1px solid var(--line-soft);}
+.rule:last-child{border-bottom:none;}
+.rule .term{font-size:11px;font-weight:900;letter-spacing:.13em;text-transform:uppercase;color:var(--accent);margin-bottom:7px;}
+.rule .desc{font-size:14px;line-height:1.55;color:var(--txt-dim);font-weight:500;}
+.rule .desc b{color:var(--txt);font-weight:700;}
+.rules-intro{font-size:13.5px;line-height:1.55;color:var(--txt-dim);font-weight:500;padding:2px 4px 4px;margin-bottom:14px;}
+.mini-chips{display:flex;gap:9px;}
+.mini-chips .mc{flex:1;text-align:center;border-radius:12px;padding:11px 6px;border:1px solid var(--line);background:var(--surface-2);}
+.mini-chips .mc .p{font-size:24px;font-weight:900;line-height:1;}
+.mini-chips .mc .n{font-size:9.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;margin-top:6px;color:var(--txt-dim);}
+.mini-chips .win .p{color:var(--accent);}.mini-chips .draw .p{color:var(--draw);}.mini-chips .loss .p{color:var(--loss);}
+
 /* ---------- Misc ---------- */
 .empty{text-align:center;padding:54px 24px;color:var(--txt-faint);}
 .empty svg{width:46px;height:46px;opacity:.4;margin-bottom:14px;}
@@ -244,7 +259,7 @@ nav.tabs button.on::before{
     <div class="brand">
       <div class="mark">P</div>
       <div>
-        <h1>Padel Americano</h1>
+        <h1>Padel Mexicano</h1>
         <div class="sub">Tournament tracker</div>
       </div>
       <div class="right">
@@ -280,6 +295,32 @@ nav.tabs button.on::before{
       <div class="sec-head"><h2>Players</h2><span class="hint">Tap to rename</span></div>
       <div class="card" id="playerList"></div>
       <p class="note">Eight players, two courts. Renaming updates every past result automatically — names are tied to a stable player slot.</p>
+    </section>
+
+    <!-- ================= RULES ================= -->
+    <section class="screen" id="screen-rules">
+      <div class="sec-head"><h2>Rules</h2><span class="hint">How we play</span></div>
+      <p class="rules-intro">Eight players, two courts. You get a new partner every round and never play with the same teammate twice in a day — so by the end you've partnered everyone.</p>
+
+      <div class="lab-sec">The match</div>
+      <div class="card rules" style="margin-bottom:18px">
+        <div class="rule"><div class="term">One rally, one point</div><div class="desc">No games, sets or 15–30–40. <b>Every rally you win is worth exactly 1 point.</b></div></div>
+        <div class="rule"><div class="term">Winning the point</div><div class="desc">You win the rally when the other team can't return the ball legally — <b>it bounces twice, goes into the net, or lands out.</b> The glass walls are in play: after the ball bounces on the floor you can play it off your own back wall. Your own shot must clear the net and land in their court.</div></div>
+        <div class="rule"><div class="term">The serve</div><div class="desc">Underhand, struck at or below waist height, <b>diagonally into the opposite box.</b> You get two tries — miss both and the point goes to the other team.</div></div>
+        <div class="rule"><div class="term">Serving order</div><div class="desc">Decide who starts. <b>The serve switches teams every 2 points</b>, and when it comes back to your team the other partner takes it — so all four players serve equally. Serve from the right box first, then the left. Receivers keep their side for the whole match.</div></div>
+        <div class="rule"><div class="term">Reaching 24</div><div class="desc">Keep a running tally of rallies won. The match ends when the two scores <b>add up to 24</b> — more points wins, <b>12–12 is a draw.</b> Then enter the score on the Schedule screen.</div></div>
+      </div>
+
+      <div class="lab-sec">Tournament points</div>
+      <div class="card" style="padding:16px;margin-bottom:14px">
+        <p class="rules-intro" style="margin:0 0 13px;padding:0">After each match, every player on the result earns:</p>
+        <div class="mini-chips">
+          <div class="mc win"><div class="p tnum">3</div><div class="n">Win</div></div>
+          <div class="mc draw"><div class="p tnum">1</div><div class="n">Draw</div></div>
+          <div class="mc loss"><div class="p tnum">0</div><div class="n">Loss</div></div>
+        </div>
+      </div>
+      <p class="note">Two leaderboards run side by side: your individual total, and a team ranking by pairing that keeps building across every day you play.</p>
     </section>
 
     <!-- ================= MORE ================= -->
@@ -327,6 +368,10 @@ nav.tabs button.on::before{
     <button data-tab="players">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0" stroke-linecap="round"/><path d="M16 5.2a3.2 3.2 0 0 1 0 5.6M17.5 20a5.5 5.5 0 0 0-2.2-4.4" stroke-linecap="round"/></svg>
       Players
+    </button>
+    <button data-tab="rules">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3V4z" stroke-linejoin="round"/><path d="M5 4a2 2 0 0 0-2 2v11a3 3 0 0 1 3-3h2" stroke-linecap="round"/><path d="M9 8.5h6M9 12h4" stroke-linecap="round"/></svg>
+      Rules
     </button>
     <button data-tab="more">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3M5 5l2 2m10 10 2 2M19 5l-2 2M7 17l-2 2" stroke-linecap="round"/></svg>
