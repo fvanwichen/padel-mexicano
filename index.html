@@ -30,16 +30,18 @@
   --maxw:540px; --nav-h:74px; --font:'Archivo',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-html,body{height:100%;background:#0d1014;}
-body{font-family:var(--font);
-  background:radial-gradient(1200px 600px at 50% -10%,rgba(198,255,61,.06),transparent 60%),linear-gradient(180deg,var(--bg-grad),var(--bg) 40%);
-   color:var(--txt);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;overscroll-behavior-y:none;}
+html{height:100%;background:var(--bg);}
+body{height:100%;overflow:hidden;font-family:var(--font);
+  background-color:var(--bg);
+  background-image:radial-gradient(1200px 600px at 50% -10%,rgba(198,255,61,.06),transparent 60%),linear-gradient(180deg,var(--bg-grad),var(--bg) 40%);
+  background-repeat:no-repeat;
+  color:var(--txt);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;overscroll-behavior-y:none;}
 button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
 input{font-family:inherit;}
 .tnum{font-variant-numeric:tabular-nums;font-feature-settings:"tnum";}
 
-#app{max-width:var(--maxw);margin:0 auto;min-height:100%;display:flex;flex-direction:column;position:relative;}
-header.top{position:sticky;top:0;z-index:30;padding:calc(env(safe-area-inset-top) + 16px) 20px 14px;
+#app{max-width:var(--maxw);margin:0 auto;height:100vh;height:100dvh;display:flex;flex-direction:column;position:relative;}
+header.top{flex:none;z-index:30;padding:calc(env(safe-area-inset-top) + 16px) 20px 14px;
   background:linear-gradient(180deg,rgba(13,16,20,.96),rgba(13,16,20,.78) 70%,transparent);
   backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);}
 .brand{display:flex;align-items:center;gap:11px;}
@@ -55,14 +57,14 @@ header.top{position:sticky;top:0;z-index:30;padding:calc(env(safe-area-inset-top
 .status-pill.off .dot{background:var(--txt-faint);box-shadow:none;}
 .day-label{font-size:11px;font-weight:700;color:var(--txt-faint);letter-spacing:.03em;}
 
-main{flex:1;padding:6px 16px calc(var(--nav-h) + env(safe-area-inset-bottom) + 22px);}
+main{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:6px 16px 26px;}
 .screen{display:none;animation:fade .32s ease both;}
 .screen.active{display:block;}
 @keyframes fade{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
 
-nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:40;height:calc(var(--nav-h) + env(safe-area-inset-bottom));
-  padding-bottom:env(safe-area-inset-bottom);display:flex;max-width:var(--maxw);margin:0 auto;
-  background:rgba(18,23,29,.9);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-top:1px solid var(--line-soft);}
+nav.tabs{flex:none;z-index:40;height:calc(var(--nav-h) + env(safe-area-inset-bottom));
+  padding-bottom:env(safe-area-inset-bottom);display:flex;
+  background:rgba(18,23,29,.92);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-top:1px solid var(--line-soft);}
 nav.tabs button{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;
   color:var(--txt-faint);font-size:10px;font-weight:700;letter-spacing:.01em;transition:color .18s;height:var(--nav-h);position:relative;}
 nav.tabs button svg{width:22px;height:22px;stroke-width:2;transition:transform .2s;}
@@ -354,15 +356,15 @@ body[data-role="scorekeeper"] .need-admin{display:none !important;}
    Leave FIREBASE_CONFIG empty to run local-only on one phone.
    ============================================================ */
 const FIREBASE_CONFIG = {
-    apiKey: "AIzaSyCN5RZTGFrWHk3FWffuCpf_C2eJBrlXRi4",
-    authDomain: "padel-mexicano.firebaseapp.com",
-    projectId: "padel-mexicano",
-    storageBucket: "padel-mexicano.firebasestorage.app",
-    messagingSenderId: "1042256413199",
-    appId: "1:1042256413199:web:7e07c2e27e837d6059997a"
+  apiKey: "AIzaSyCN5RZTGFrWHk3FWffuCpf_C2eJBrlXRi4",
+  authDomain: "padel-mexicano.firebaseapp.com",
+  projectId: "padel-mexicano",
+  storageBucket: "padel-mexicano.firebasestorage.app",
+  messagingSenderId: "1042256413199",
+  appId: "1:1042256413199:web:7e07c2e27e837d6059997a"
 };
 const TOURNAMENT_ID = 'live';                  // one shared tournament document
-const ACCESS = { scorekeeper: '5555', admin: '2525' };   // CHANGE these before sharing
+const ACCESS = { scorekeeper: '5555', admin: '2525' };   // scorekeeper / admin
 /* ============================================================ */
 
 const PLAYER_COUNT = 8, MAX_ROUNDS = 7;
@@ -696,7 +698,7 @@ function switchTab(tab){ L.tab=tab; saveLocal();
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   $('#screen-'+tab).classList.add('active');
   document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===tab));
-  window.scrollTo(0,0);
+  const m=document.querySelector('main'); if(m) m.scrollTop=0;
 }
 document.querySelectorAll('nav.tabs button').forEach(b=>b.onclick=()=>switchTab(b.dataset.tab));
 document.querySelectorAll('#standType button').forEach(b=>b.onclick=()=>{L.standType=b.dataset.st;saveLocal();renderStandings();});
