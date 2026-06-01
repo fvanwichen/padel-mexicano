@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
+<meta name="theme-color" content="#0d1014" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<title>Padel Americano</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   PADEL AMERICANO — design tokens (re-theme everything here)
+   ============================================================ */
+:root{
+  --bg:#0d1014;
+  --bg-grad:#11161c;
+  --surface:#161b22;
+  --surface-2:#1c232c;
+  --surface-3:#222b35;
+  --line:#2a333e;
+  --line-soft:#222a33;
+  --txt:#eef2f6;
+  --txt-dim:#9aa7b4;
+  --txt-faint:#697682;
+  --accent:#c6ff3d;        /* electric lime */
+  --accent-press:#b3ec2a;
+  --accent-ink:#0d1014;    /* text on accent */
+  --gold:#ffd24a;
+  --silver:#cfd8e3;
+  --bronze:#e0a06a;
+  --win:#c6ff3d;
+  --draw:#5ec8ff;
+  --loss:#46525f;
+  --danger:#ff5d5d;
+  --radius:18px;
+  --radius-sm:12px;
+  --shadow:0 12px 34px rgba(0,0,0,.45);
+  --maxw:540px;
+  --nav-h:74px;
+  --font:'Archivo',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;}
+body{
+  font-family:var(--font);
+  background:
+    radial-gradient(1200px 600px at 50% -10%, rgba(198,255,61,.06), transparent 60%),
+    linear-gradient(180deg,var(--bg-grad),var(--bg) 40%);
+  background-attachment:fixed;
+  color:var(--txt);
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+  overscroll-behavior-y:none;
+}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+input{font-family:inherit;}
+.tnum{font-variant-numeric:tabular-nums;font-feature-settings:"tnum";}
+
+/* ---------- App shell ---------- */
+#app{max-width:var(--maxw);margin:0 auto;min-height:100%;display:flex;flex-direction:column;position:relative;}
+header.top{
+  position:sticky;top:0;z-index:30;
+  padding:calc(env(safe-area-inset-top) + 16px) 20px 14px;
+  background:linear-gradient(180deg,rgba(13,16,20,.96),rgba(13,16,20,.78) 70%,transparent);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+}
+.brand{display:flex;align-items:center;gap:11px;}
+.brand .mark{
+  width:34px;height:34px;border-radius:10px;flex:none;
+  background:var(--accent);color:var(--accent-ink);
+  display:grid;place-items:center;font-weight:900;font-size:19px;
+  box-shadow:0 0 0 1px rgba(198,255,61,.4),0 6px 18px rgba(198,255,61,.22);
+}
+.brand h1{font-size:18px;font-weight:800;letter-spacing:-.02em;line-height:1;}
+.brand .sub{font-size:11.5px;color:var(--txt-faint);font-weight:600;letter-spacing:.04em;text-transform:uppercase;margin-top:3px;}
+.brand .right{margin-left:auto;text-align:right;}
+.session-pill{
+  display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;
+  color:var(--accent);background:rgba(198,255,61,.1);border:1px solid rgba(198,255,61,.25);
+  padding:5px 10px;border-radius:999px;letter-spacing:.02em;
+}
+.session-pill .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent);}
+
+main{flex:1;padding:6px 16px calc(var(--nav-h) + env(safe-area-inset-bottom) + 22px);}
+.screen{display:none;animation:fade .32s ease both;}
+.screen.active{display:block;}
+@keyframes fade{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+
+/* ---------- Bottom nav ---------- */
+nav.tabs{
+  position:fixed;left:0;right:0;bottom:0;z-index:40;
+  height:calc(var(--nav-h) + env(safe-area-inset-bottom));
+  padding-bottom:env(safe-area-inset-bottom);
+  display:flex;max-width:var(--maxw);margin:0 auto;
+  background:rgba(18,23,29,.9);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  border-top:1px solid var(--line-soft);
+}
+nav.tabs button{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;
+  color:var(--txt-faint);font-size:10.5px;font-weight:700;letter-spacing:.02em;
+  transition:color .18s;height:var(--nav-h);position:relative;
+}
+nav.tabs button svg{width:23px;height:23px;stroke-width:2;transition:transform .2s;}
+nav.tabs button.on{color:var(--accent);}
+nav.tabs button.on svg{transform:translateY(-1px);}
+nav.tabs button.on::before{
+  content:"";position:absolute;top:0;width:26px;height:3px;border-radius:0 0 4px 4px;
+  background:var(--accent);box-shadow:0 0 10px var(--accent);
+}
+
+/* ---------- Section headers ---------- */
+.sec-head{display:flex;align-items:flex-end;justify-content:space-between;margin:18px 2px 13px;}
+.sec-head h2{font-size:22px;font-weight:800;letter-spacing:-.03em;}
+.sec-head .hint{font-size:12px;color:var(--txt-faint);font-weight:600;}
+
+/* ---------- Buttons ---------- */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  padding:14px 18px;border-radius:14px;font-weight:800;font-size:15px;letter-spacing:-.01em;
+  transition:transform .12s,background .18s,opacity .18s;width:100%;
+}
+.btn:active{transform:scale(.97);}
+.btn-primary{background:var(--accent);color:var(--accent-ink);box-shadow:0 8px 22px rgba(198,255,61,.22);}
+.btn-primary:active{background:var(--accent-press);}
+.btn-ghost{background:var(--surface-2);color:var(--txt);border:1px solid var(--line);}
+.btn-danger{background:rgba(255,93,93,.12);color:var(--danger);border:1px solid rgba(255,93,93,.3);}
+.btn-sm{padding:10px 14px;font-size:13.5px;width:auto;border-radius:11px;}
+.btn[disabled]{opacity:.4;pointer-events:none;}
+
+/* ---------- Cards ---------- */
+.card{background:var(--surface);border:1px solid var(--line-soft);border-radius:var(--radius);box-shadow:var(--shadow);}
+.stagger{animation:rise .4s ease both;}
+@keyframes rise{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:none;}}
+
+/* ---------- Players ---------- */
+.player-row{display:flex;align-items:center;gap:12px;padding:11px 14px;border-bottom:1px solid var(--line-soft);}
+.player-row:last-child{border-bottom:none;}
+.pnum{width:30px;height:30px;flex:none;border-radius:9px;background:var(--surface-3);color:var(--txt-dim);
+  display:grid;place-items:center;font-weight:800;font-size:13px;}
+.player-row input{
+  flex:1;background:transparent;border:none;color:var(--txt);font-size:16px;font-weight:600;padding:8px 4px;outline:none;
+  border-bottom:1.5px solid transparent;transition:border-color .18s;
+}
+.player-row input:focus{border-bottom-color:var(--accent);}
+
+/* ---------- Setup controls ---------- */
+.field{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--line-soft);}
+.field:last-child{border-bottom:none;}
+.field .lab{font-size:14.5px;font-weight:600;}
+.field .lab small{display:block;color:var(--txt-faint);font-weight:600;font-size:11.5px;margin-top:2px;}
+.stepper{display:flex;align-items:center;gap:0;background:var(--surface-2);border:1px solid var(--line);border-radius:12px;overflow:hidden;}
+.stepper button{width:40px;height:40px;font-size:22px;font-weight:700;color:var(--accent);display:grid;place-items:center;}
+.stepper button:active{background:var(--surface-3);}
+.stepper .val{min-width:46px;text-align:center;font-weight:800;font-size:17px;}
+
+/* ---------- Schedule ---------- */
+.round-card{margin-bottom:14px;overflow:hidden;}
+.round-head{display:flex;align-items:center;gap:10px;padding:13px 16px;background:var(--surface-2);border-bottom:1px solid var(--line-soft);}
+.round-head .rn{font-weight:900;font-size:14px;letter-spacing:.02em;}
+.round-head .meta{font-size:11.5px;color:var(--txt-faint);font-weight:700;margin-left:auto;text-transform:uppercase;letter-spacing:.05em;}
+.match{padding:14px 16px;border-bottom:1px solid var(--line-soft);}
+.match:last-child{border-bottom:none;}
+.court-chip{display:inline-flex;align-items:center;gap:6px;font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--txt-dim);background:var(--surface-3);padding:4px 9px;border-radius:7px;margin-bottom:11px;}
+.court-chip .ci{color:var(--accent);}
+.team-line{display:flex;align-items:center;gap:10px;padding:7px 0;}
+.team-names{flex:1;font-weight:700;font-size:15.5px;line-height:1.25;}
+.team-names .amp{color:var(--txt-faint);font-weight:600;margin:0 5px;}
+.team.win .team-names{color:var(--accent);}
+.team.loss .team-names{color:var(--txt-dim);}
+.score-box{display:flex;align-items:center;gap:9px;}
+.score-step{width:34px;height:34px;border-radius:9px;background:var(--surface-2);border:1px solid var(--line);
+  display:grid;place-items:center;font-size:19px;font-weight:700;color:var(--txt-dim);}
+.score-step:active{background:var(--surface-3);}
+.score-val{width:42px;text-align:center;font-size:24px;font-weight:900;background:transparent;border:none;color:var(--txt);outline:none;}
+.score-static{width:46px;text-align:center;font-size:26px;font-weight:900;}
+.team.win .score-static{color:var(--accent);}
+.vs-mid{display:flex;align-items:center;justify-content:center;gap:8px;margin:3px 0;}
+.vs-mid span{font-size:10.5px;font-weight:800;color:var(--txt-faint);letter-spacing:.12em;}
+.vs-mid .ln{height:1px;flex:1;background:var(--line-soft);}
+.match-foot{display:flex;gap:9px;margin-top:13px;}
+.tag-done{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:800;color:var(--accent);
+  background:rgba(198,255,61,.1);padding:7px 11px;border-radius:9px;}
+.tag-draw{color:var(--draw);background:rgba(94,200,255,.1);}
+
+/* ---------- Standings ---------- */
+.seg{display:flex;background:var(--surface-2);border:1px solid var(--line);border-radius:13px;padding:4px;gap:4px;margin-bottom:6px;}
+.seg button{flex:1;padding:10px;border-radius:9px;font-weight:800;font-size:13px;color:var(--txt-dim);transition:.18s;}
+.seg button.on{background:var(--accent);color:var(--accent-ink);}
+.scope-row{display:flex;background:var(--surface);border:1px solid var(--line-soft);border-radius:11px;padding:3px;gap:3px;margin:0 0 14px;}
+.scope-row button{flex:1;padding:8px;border-radius:8px;font-weight:700;font-size:12px;color:var(--txt-faint);transition:.18s;}
+.scope-row button.on{background:var(--surface-3);color:var(--txt);}
+
+.rank-row{display:flex;align-items:center;gap:13px;padding:13px 15px;border-bottom:1px solid var(--line-soft);}
+.rank-row:last-child{border-bottom:none;}
+.rk{width:30px;height:30px;flex:none;border-radius:9px;display:grid;place-items:center;font-weight:900;font-size:14px;
+  background:var(--surface-3);color:var(--txt-dim);}
+.rank-row.top1 .rk{background:var(--gold);color:#3a2c00;box-shadow:0 0 16px rgba(255,210,74,.4);}
+.rank-row.top2 .rk{background:var(--silver);color:#2a2f36;}
+.rank-row.top3 .rk{background:var(--bronze);color:#3a2207;}
+.rank-main{flex:1;min-width:0;}
+.rank-main .nm{font-weight:800;font-size:16px;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.rank-main .wdl{font-size:11.5px;color:var(--txt-faint);font-weight:600;margin-top:3px;letter-spacing:.02em;}
+.rank-main .wdl b{color:var(--txt-dim);}
+.pts{text-align:right;flex:none;}
+.pts .big{font-size:24px;font-weight:900;line-height:1;}
+.pts .lbl{font-size:9.5px;color:var(--txt-faint);font-weight:800;letter-spacing:.1em;text-transform:uppercase;margin-top:2px;}
+.rank-row.top1 .pts .big{color:var(--accent);}
+.diff{font-size:11px;color:var(--txt-faint);font-weight:700;}
+.diff.pos{color:var(--win);}.diff.neg{color:var(--loss);}
+
+/* ---------- Misc ---------- */
+.empty{text-align:center;padding:54px 24px;color:var(--txt-faint);}
+.empty svg{width:46px;height:46px;opacity:.4;margin-bottom:14px;}
+.empty p{font-size:14.5px;font-weight:600;line-height:1.5;max-width:280px;margin:0 auto;}
+.note{font-size:12px;color:var(--txt-faint);line-height:1.55;padding:0 4px;margin-top:10px;font-weight:500;}
+.divider{height:1px;background:var(--line-soft);margin:18px 2px;}
+.stack>*{margin-bottom:12px;}
+.row2{display:flex;gap:10px;}.row2>*{flex:1;}
+
+/* ---------- Toast ---------- */
+#toast{position:fixed;left:50%;bottom:calc(var(--nav-h) + env(safe-area-inset-bottom) + 18px);transform:translateX(-50%) translateY(20px);
+  background:var(--surface-3);color:var(--txt);border:1px solid var(--line);padding:12px 18px;border-radius:13px;
+  font-size:13.5px;font-weight:700;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:.3s;z-index:100;max-width:88%;text-align:center;}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* ---------- Modal ---------- */
+.modal-back{position:fixed;inset:0;background:rgba(5,7,9,.7);backdrop-filter:blur(4px);z-index:90;display:none;
+  align-items:flex-end;justify-content:center;}
+.modal-back.show{display:flex;animation:fade .2s ease;}
+.modal{background:var(--surface);border:1px solid var(--line);border-radius:22px 22px 0 0;width:100%;max-width:var(--maxw);
+  padding:24px 22px calc(env(safe-area-inset-bottom) + 24px);animation:up .3s cubic-bezier(.2,.8,.2,1);}
+@keyframes up{from{transform:translateY(100%);}to{transform:none;}}
+.modal h3{font-size:19px;font-weight:800;margin-bottom:8px;letter-spacing:-.02em;}
+.modal p{font-size:14px;color:var(--txt-dim);line-height:1.55;margin-bottom:20px;}
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="top">
+    <div class="brand">
+      <div class="mark">P</div>
+      <div>
+        <h1>Padel Americano</h1>
+        <div class="sub">Tournament tracker</div>
+      </div>
+      <div class="right">
+        <span class="session-pill"><span class="dot"></span><span id="sessionLabel">Day 1</span></span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- ================= STANDINGS ================= -->
+    <section class="screen active" id="screen-standings">
+      <div class="sec-head"><h2>Standings</h2><span class="hint" id="standingsHint"></span></div>
+      <div class="seg" id="standType">
+        <button data-st="ind" class="on">Players</button>
+        <button data-st="team">Teams</button>
+      </div>
+      <div class="scope-row" id="scopeRow">
+        <button data-scope="all" class="on">All days</button>
+        <button data-scope="session">This day</button>
+      </div>
+      <div class="card" id="standingsList"></div>
+      <p class="note" id="standingsNote"></p>
+    </section>
+
+    <!-- ================= SCHEDULE ================= -->
+    <section class="screen" id="screen-schedule">
+      <div class="sec-head"><h2>Schedule</h2><span class="hint" id="scheduleHint"></span></div>
+      <div id="scheduleBody"></div>
+    </section>
+
+    <!-- ================= PLAYERS ================= -->
+    <section class="screen" id="screen-players">
+      <div class="sec-head"><h2>Players</h2><span class="hint">Tap to rename</span></div>
+      <div class="card" id="playerList"></div>
+      <p class="note">Eight players, two courts. Renaming updates every past result automatically — names are tied to a stable player slot.</p>
+    </section>
+
+    <!-- ================= MORE ================= -->
+    <section class="screen" id="screen-more">
+      <div class="sec-head"><h2>Tournament</h2></div>
+      <div class="card" id="settingsCard">
+        <div class="field">
+          <div class="lab">Points per match<small>Play to this total; more points wins</small></div>
+          <div class="stepper" data-step="pointTarget">
+            <button data-d="-1">−</button><span class="val tnum" id="ptVal">24</span><button data-d="1">+</button>
+          </div>
+        </div>
+        <div class="field">
+          <div class="lab">Rounds per day<small>Max 7 — everyone partners everyone once</small></div>
+          <div class="stepper" data-step="defaultRounds">
+            <button data-d="-1">−</button><span class="val tnum" id="rdVal">6</span><button data-d="1">+</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="sec-head"><h2 style="font-size:17px">Days</h2></div>
+      <div class="card" id="sessionList" style="margin-bottom:12px"></div>
+      <button class="btn btn-ghost" id="newDayBtn">+ Start a new day</button>
+
+      <div class="divider"></div>
+      <div class="stack">
+        <button class="btn btn-ghost" id="exportBtn">Export backup (.json)</button>
+        <button class="btn btn-ghost" id="importBtn">Import backup</button>
+        <input type="file" id="importFile" accept="application/json" hidden />
+        <button class="btn btn-danger" id="resetBtn">Reset everything</button>
+      </div>
+      <p class="note">Everything is saved on this device only. Use Export to back up or move data to another phone. <br>Built to plug into live multi-phone sync later without changing any of the scoring logic.</p>
+    </section>
+  </main>
+
+  <nav class="tabs">
+    <button data-tab="standings" class="on">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 21V9m7 12V3m7 18v-7" stroke-linecap="round"/></svg>
+      Standings
+    </button>
+    <button data-tab="schedule">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4m8-4v4" stroke-linecap="round"/></svg>
+      Schedule
+    </button>
+    <button data-tab="players">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0" stroke-linecap="round"/><path d="M16 5.2a3.2 3.2 0 0 1 0 5.6M17.5 20a5.5 5.5 0 0 0-2.2-4.4" stroke-linecap="round"/></svg>
+      Players
+    </button>
+    <button data-tab="more">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3M5 5l2 2m10 10 2 2M19 5l-2 2M7 17l-2 2" stroke-linecap="round"/></svg>
+      More
+    </button>
+  </nav>
+</div>
+
+<div id="toast"></div>
+<div class="modal-back" id="modalBack">
+  <div class="modal">
+    <h3 id="modalTitle"></h3>
+    <p id="modalBody"></p>
+    <div class="row2">
+      <button class="btn btn-ghost" id="modalCancel">Cancel</button>
+      <button class="btn btn-primary" id="modalOk">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   STORAGE ADAPTER
+   The whole app talks to `Store` only. Swapping localStorage for
+   a synced backend later (path B: Firebase / Upstash REST) means
+   re-implementing load()/save() here and nothing else.
+   localStorage is wrapped in try/catch so it never crashes in a
+   sandboxed preview; it falls back to in-memory for the session.
+   ============================================================ */
+const Store = (() => {
+  const KEY = 'padelAmericano.v1';
+  let mem = null;
+  let ok = true;
+  try { const t = '__t'; localStorage.setItem(t,'1'); localStorage.removeItem(t); } catch(e){ ok = false; }
+  return {
+    load(){
+      if(!ok) return mem;
+      try { const r = localStorage.getItem(KEY); return r ? JSON.parse(r) : null; }
+      catch(e){ return mem; }
+    },
+    save(data){
+      mem = data;
+      if(!ok) return;
+      try { localStorage.setItem(KEY, JSON.stringify(data)); } catch(e){ ok = false; }
+    },
+    persistent(){ return ok; }
+  };
+})();
+
+/* ============================================================
+   STATE
+   ============================================================ */
+const PLAYER_COUNT = 8, COURTS = 4 / 2, MAX_ROUNDS = 7;
+let state;
+
+function defaultState(){
+  return {
+    schema: 1,
+    players: Array.from({length:PLAYER_COUNT}, (_,i)=>({ id:'p'+(i+1), name:'Player '+(i+1) })),
+    settings: { pointTarget:24, defaultRounds:6 },
+    sessions: [ newSession(1) ],
+    currentSessionId: null,
+    ui: { tab:'standings', standType:'ind', scope:'all' }
+  };
+}
+function newSession(n){
+  const id = 's'+Date.now()+Math.floor(Math.random()*1000);
+  return { id, name:'Day '+n, created:Date.now(), rounds:[] };
+}
+function load(){
+  state = Store.load();
+  if(!state || !state.players){ state = defaultState(); }
+  if(!state.currentSessionId) state.currentSessionId = state.sessions[state.sessions.length-1].id;
+  if(!state.ui) state.ui = { tab:'standings', standType:'ind', scope:'all' };
+  save();
+}
+function save(){ Store.save(state); }
+function currentSession(){ return state.sessions.find(s=>s.id===state.currentSessionId) || state.sessions[state.sessions.length-1]; }
+function playerName(id){ const p = state.players.find(x=>x.id===id); return p ? p.name : '?'; }
+
+/* ============================================================
+   SCHEDULE GENERATION
+   1-factorization (circle method) → no partnership repeats in a day,
+   all 8 play every round. Player→slot mapping is randomised each
+   generation so teams feel fresh while staying valid. Match grouping
+   greedily balances who you play against.
+   ============================================================ */
+function factorization(n){
+  const fixed = n-1, m = n-1, rounds = [];
+  for(let i=0;i<n-1;i++){
+    const pairs = [[fixed, i % m]];
+    for(let k=1;k<n/2;k++) pairs.push([ (i+k)%m, ((i-k)%m + m)%m ]);
+    rounds.push(pairs);
+  }
+  return rounds;
+}
+function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+function generateSchedule(numRounds){
+  const n = PLAYER_COUNT;
+  const fac = factorization(n);
+  // random slot→player map
+  const perm = shuffle(state.players.map(p=>p.id));
+  const opp = {}; const ok=(a,b)=>a<b?a+'|'+b:b+'|'+a;
+  const rounds = [];
+  for(let r=0;r<numRounds;r++){
+    const pairs = fac[r].map(([a,b])=>[perm[a],perm[b]]);
+    const splits = [[[0,1],[2,3]],[[0,2],[1,3]],[[0,3],[1,2]]];
+    let best=null,bestCost=Infinity;
+    shuffle(splits);
+    for(const s of splits){
+      let cost=0;
+      for(const [x,y] of s){
+        const [a,b]=pairs[x],[c,d]=pairs[y];
+        cost+=(opp[ok(a,c)]||0)+(opp[ok(a,d)]||0)+(opp[ok(b,c)]||0)+(opp[ok(b,d)]||0);
+      }
+      if(cost<bestCost){bestCost=cost;best=s;}
+    }
+    const matches=[];
+    best.forEach(([x,y],ci)=>{
+      let teamA=pairs[x].slice(), teamB=pairs[y].slice();
+      [[teamA[0],teamB[0]],[teamA[0],teamB[1]],[teamA[1],teamB[0]],[teamA[1],teamB[1]]]
+        .forEach(([p,q])=>{opp[ok(p,q)]=(opp[ok(p,q)]||0)+1;});
+      if(Math.random()<.5)[teamA,teamB]=[teamB,teamA];
+      matches.push({ id:'m'+r+'_'+ci, court:ci+1, teamA, teamB, scoreA:null, scoreB:null, done:false });
+    });
+    if(Math.random()<.5) matches.reverse(), matches.forEach((m,i)=>m.court=i+1);
+    rounds.push({ n:r+1, matches });
+  }
+  return rounds;
+}
+
+/* ============================================================
+   SCORING  (3 win / 1 draw / 0 loss)
+   ============================================================ */
+function blankInd(){ return {pts:0,played:0,w:0,d:0,l:0,pf:0,pa:0}; }
+function teamKey(a,b){ return a<b?a+'~'+b:b+'~'+a; }
+
+function computeStandings(scope){
+  const sessions = scope==='session' ? [currentSession()] : state.sessions;
+  const ind = {}; state.players.forEach(p=>ind[p.id]=blankInd());
+  const team = {};
+  for(const ses of sessions){
+    for(const rnd of ses.rounds){
+      for(const m of rnd.matches){
+        if(!m.done || m.scoreA==null || m.scoreB==null) continue;
+        const aWin = m.scoreA>m.scoreB, draw = m.scoreA===m.scoreB;
+        const aPts = draw?1:(aWin?3:0), bPts = draw?1:(aWin?0:3);
+        applyInd(ind,m.teamA,aPts,draw,aWin,m.scoreA,m.scoreB);
+        applyInd(ind,m.teamB,bPts,draw,!aWin,m.scoreB,m.scoreA);
+        applyTeam(team,m.teamA,aPts,draw,aWin,m.scoreA,m.scoreB);
+        applyTeam(team,m.teamB,bPts,draw,!aWin,m.scoreB,m.scoreA);
+      }
+    }
+  }
+  return { ind, team };
+}
+function applyInd(ind,players,pts,draw,won,pf,pa){
+  players.forEach(pid=>{
+    const s=ind[pid]; if(!s)return;
+    s.pts+=pts;s.played++;s.pf+=pf;s.pa+=pa;
+    if(draw)s.d++; else if(won)s.w++; else s.l++;
+  });
+}
+function applyTeam(team,players,pts,draw,won,pf,pa){
+  const k=teamKey(players[0],players[1]);
+  if(!team[k]) team[k]={a:players[0],b:players[1],pts:0,played:0,w:0,d:0,l:0,pf:0,pa:0};
+  const s=team[k];
+  s.pts+=pts;s.played++;s.pf+=pf;s.pa+=pa;
+  if(draw)s.d++; else if(won)s.w++; else s.l++;
+}
+function rankSort(arr){
+  return arr.sort((x,y)=> y.pts-x.pts || (y.pf-y.pa)-(x.pf-x.pa) || y.pf-x.pf || y.w-x.w);
+}
+
+/* ============================================================
+   RENDERING
+   ============================================================ */
+const $ = s=>document.querySelector(s);
+const el = (t,c,h)=>{const e=document.createElement(t); if(c)e.className=c; if(h!=null)e.innerHTML=h; return e;};
+
+function render(){
+  $('#sessionLabel').textContent = currentSession().name;
+  renderStandings();
+  renderSchedule();
+  renderPlayers();
+  renderSettings();
+}
+
+/* ---- Standings ---- */
+function renderStandings(){
+  const {standType,scope} = state.ui;
+  document.querySelectorAll('#standType button').forEach(b=>b.classList.toggle('on',b.dataset.st===standType));
+  document.querySelectorAll('#scopeRow button').forEach(b=>b.classList.toggle('on',b.dataset.scope===scope));
+  const {ind,team} = computeStandings(scope);
+  const list = $('#standingsList'); list.innerHTML='';
+
+  if(standType==='ind'){
+    const rows = rankSort(state.players.map(p=>({id:p.id,name:p.name,...ind[p.id]})));
+    const anyPlayed = rows.some(r=>r.played>0);
+    $('#standingsHint').textContent = anyPlayed ? rows[0].name.split(' ')[0]+' leads' : '';
+    if(!anyPlayed){ list.appendChild(emptyState('No results yet','Generate a schedule and save a match to see the ranking build up.')); }
+    else rows.forEach((r,i)=>list.appendChild(rankRow(i,r.name,r,false)));
+    $('#standingsNote').textContent='3 points for a win, 1 for a draw. Ties broken by point difference.';
+  } else {
+    const rows = rankSort(Object.values(team).map(t=>({...t,name:playerName(t.a)+' & '+playerName(t.b)})));
+    $('#standingsHint').textContent = rows.length ? rows.length+' teams' : '';
+    if(!rows.length){ list.appendChild(emptyState('No teams yet','Each pairing can only happen once per day — team points stack up across days.')); }
+    else rows.forEach((r,i)=>list.appendChild(rankRow(i,r.name,r,true)));
+    $('#standingsNote').textContent='A team = one pair of players. The same pair never repeats in a day, but carries points across days.';
+  }
+}
+function rankRow(i,name,s,isTeam){
+  const top = i===0?'top1':i===1?'top2':i===2?'top3':'';
+  const diff = s.pf-s.pa, dCls = diff>0?'pos':diff<0?'neg':'';
+  const wdl = `<b>${s.w}</b>W · <b>${s.d}</b>D · <b>${s.l}</b>L` +
+              `  <span class="diff ${dCls}">${diff>0?'+':''}${diff}</span>`;
+  const row = el('div','rank-row stagger '+top);
+  row.style.animationDelay=(i*0.035)+'s';
+  row.innerHTML = `<div class="rk tnum">${i+1}</div>
+    <div class="rank-main"><div class="nm">${esc(name)}</div><div class="wdl tnum">${s.played?wdl:'—'}</div></div>
+    <div class="pts"><div class="big tnum">${s.pts}</div><div class="lbl">pts</div></div>`;
+  return row;
+}
+
+/* ---- Schedule ---- */
+function renderSchedule(){
+  const ses = currentSession(); const body = $('#scheduleBody'); body.innerHTML='';
+  const done = ses.rounds.reduce((a,r)=>a+r.matches.filter(m=>m.done).length,0);
+  const total = ses.rounds.reduce((a,r)=>a+r.matches.length,0);
+  $('#scheduleHint').textContent = total? `${done}/${total} played` : '';
+
+  if(!ses.rounds.length){
+    body.appendChild(emptyState('No schedule yet',`Generate ${state.settings.defaultRounds} rounds of randomised, no-repeat-partner matches for ${ses.name}.`));
+    const gen = el('button','btn btn-primary','⚡  Generate schedule'); gen.style.marginTop='4px';
+    gen.onclick=()=>doGenerate(); body.appendChild(gen);
+    return;
+  }
+  ses.rounds.forEach((rnd,ri)=>{
+    const c = el('div','card round-card stagger'); c.style.animationDelay=(ri*.05)+'s';
+    c.appendChild(el('div','round-head',
+      `<span class="rn">ROUND ${rnd.n}</span><span class="meta">${rnd.matches.length} courts</span>`));
+    rnd.matches.forEach(m=>c.appendChild(matchEl(rnd,m)));
+    body.appendChild(c);
+  });
+  const re = el('button','btn btn-ghost','↻  Regenerate schedule'); re.style.marginTop='6px';
+  re.onclick=()=>{ const played = ses.rounds.some(r=>r.matches.some(m=>m.done));
+    played ? confirmModal('Regenerate?','This clears all results entered for '+ses.name+' and builds a fresh draw.',doGenerate) : doGenerate(); };
+  body.appendChild(re);
+}
+function matchEl(rnd,m){
+  const wrap = el('div','match');
+  wrap.appendChild(el('div','court-chip',`<span class="ci">▮</span> Court ${m.court}`));
+  const aWin=m.done&&m.scoreA>m.scoreB, bWin=m.done&&m.scoreB>m.scoreA, draw=m.done&&m.scoreA===m.scoreB;
+  wrap.appendChild(teamLine(m,'A',aWin,bWin));
+  const mid=el('div','vs-mid','<span class="ln"></span><span>VS</span><span class="ln"></span>'); wrap.appendChild(mid);
+  wrap.appendChild(teamLine(m,'B',bWin,aWin));
+  const foot=el('div','match-foot');
+  if(m.done){
+    foot.appendChild(el('span','tag-done'+(draw?' tag-draw':''), draw?'◷ Draw — 1 pt each':'✓ Saved'));
+    const edit=el('button','btn btn-ghost btn-sm','Edit'); edit.onclick=()=>{m.done=false;save();render();};
+    foot.appendChild(edit);
+  } else {
+    const sv=el('button','btn btn-primary btn-sm','Save result'); sv.style.flex='1';
+    sv.onclick=()=>{ if(m.scoreA==null)m.scoreA=0; if(m.scoreB==null)m.scoreB=0; m.done=true; save(); render(); toast('Result saved'); };
+    foot.appendChild(sv);
+  }
+  wrap.appendChild(foot);
+  return wrap;
+}
+function teamLine(m,side,win,loss){
+  const team=side==='A'?m.teamA:m.teamB;
+  const scoreField=side==='A'?'scoreA':'scoreB';
+  const line=el('div','team-line team'+(win?' win':loss?' loss':''));
+  line.innerHTML=`<div class="team-names">${esc(playerName(team[0]))}<span class="amp">&amp;</span>${esc(playerName(team[1]))}</div>`;
+  const box=el('div','score-box');
+  if(m.done){
+    box.innerHTML=`<div class="score-static tnum">${m[scoreField]??0}</div>`;
+  } else {
+    const dec=el('button','score-step','−');
+    const inp=el('input','score-val tnum'); inp.type='number'; inp.inputMode='numeric'; inp.value=m[scoreField]??'';
+    inp.placeholder='0'; inp.min=0;
+    const inc=el('button','score-step','+');
+    const setv=v=>{ v=Math.max(0,v|0); m[scoreField]=v; inp.value=v; save(); };
+    dec.onclick=()=>setv((m[scoreField]||0)-1);
+    inc.onclick=()=>setv((m[scoreField]||0)+1);
+    inp.oninput=()=>{ m[scoreField]= inp.value===''?null:Math.max(0,parseInt(inp.value)||0); save(); };
+    box.append(dec,inp,inc);
+  }
+  line.appendChild(box);
+  return line;
+}
+function doGenerate(){
+  const ses=currentSession();
+  ses.rounds = generateSchedule(Math.min(state.settings.defaultRounds,MAX_ROUNDS));
+  save(); render(); toast('Schedule ready · '+ses.rounds.length+' rounds');
+}
+
+/* ---- Players ---- */
+function renderPlayers(){
+  const list=$('#playerList'); list.innerHTML='';
+  state.players.forEach((p,i)=>{
+    const row=el('div','player-row');
+    row.innerHTML=`<div class="pnum tnum">${i+1}</div>`;
+    const inp=el('input'); inp.value=p.name; inp.maxLength=22; inp.spellcheck=false;
+    inp.onchange=()=>{ p.name=inp.value.trim()||('Player '+(i+1)); inp.value=p.name; save(); renderStandings(); renderSchedule(); };
+    row.appendChild(inp); list.appendChild(row);
+  });
+}
+
+/* ---- Settings / Days ---- */
+function renderSettings(){
+  $('#ptVal').textContent=state.settings.pointTarget;
+  $('#rdVal').textContent=state.settings.defaultRounds;
+  const list=$('#sessionList'); list.innerHTML='';
+  state.sessions.forEach((s,i)=>{
+    const played=s.rounds.reduce((a,r)=>a+r.matches.filter(m=>m.done).length,0);
+    const active=s.id===state.currentSessionId;
+    const row=el('div','field');
+    row.innerHTML=`<div class="lab">${esc(s.name)} ${active?'<small style="color:var(--accent)">● current</small>':'<small>'+played+' matches played</small>'}</div>`;
+    if(!active){ const b=el('button','btn btn-ghost btn-sm','Switch'); b.onclick=()=>{state.currentSessionId=s.id;save();render();toast('Now on '+s.name);}; row.appendChild(b); }
+    list.appendChild(row);
+  });
+}
+
+/* ---- Helpers ---- */
+function emptyState(t,b){ const e=el('div','empty');
+  e.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 2" stroke-linecap="round"/></svg><p><b style="color:var(--txt-dim)">${t}</b><br>${b}</p>`; return e; }
+function esc(s){ return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+let toastT;
+function toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),1900); }
+function confirmModal(title,body,onOk){
+  $('#modalTitle').textContent=title; $('#modalBody').textContent=body;
+  const back=$('#modalBack'); back.classList.add('show');
+  const ok=$('#modalOk'),cancel=$('#modalCancel');
+  const close=()=>back.classList.remove('show');
+  ok.onclick=()=>{close();onOk();}; cancel.onclick=close;
+  back.onclick=e=>{if(e.target===back)close();};
+}
+
+/* ============================================================
+   NAV + EVENTS
+   ============================================================ */
+function switchTab(tab){
+  state.ui.tab=tab; save();
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  $('#screen-'+tab).classList.add('active');
+  document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===tab));
+  window.scrollTo(0,0);
+}
+document.querySelectorAll('nav.tabs button').forEach(b=>b.onclick=()=>switchTab(b.dataset.tab));
+document.querySelectorAll('#standType button').forEach(b=>b.onclick=()=>{state.ui.standType=b.dataset.st;save();renderStandings();});
+document.querySelectorAll('#scopeRow button').forEach(b=>b.onclick=()=>{state.ui.scope=b.dataset.scope;save();renderStandings();});
+
+document.querySelectorAll('.stepper').forEach(st=>{
+  const key=st.dataset.step;
+  st.querySelectorAll('button').forEach(btn=>btn.onclick=()=>{
+    const d=+btn.dataset.d; let v=state.settings[key]+d;
+    if(key==='pointTarget') v=Math.max(8,Math.min(48,v));
+    if(key==='defaultRounds') v=Math.max(1,Math.min(MAX_ROUNDS,v));
+    state.settings[key]=v; save(); renderSettings();
+  });
+});
+
+$('#newDayBtn').onclick=()=>{
+  const n=state.sessions.length+1;
+  const s=newSession(n); state.sessions.push(s); state.currentSessionId=s.id;
+  save(); switchTab('schedule'); render(); toast('Started '+s.name);
+};
+$('#exportBtn').onclick=()=>{
+  const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download='padel-americano-'+new Date().toISOString().slice(0,10)+'.json'; a.click();
+  toast('Backup downloaded');
+};
+$('#importBtn').onclick=()=>$('#importFile').click();
+$('#importFile').onchange=e=>{
+  const f=e.target.files[0]; if(!f)return; const r=new FileReader();
+  r.onload=()=>{ try{ const d=JSON.parse(r.result); if(!d.players)throw 0;
+    state=d; if(!state.ui)state.ui={tab:'standings',standType:'ind',scope:'all'};
+    if(!state.currentSessionId)state.currentSessionId=state.sessions[state.sessions.length-1].id;
+    save(); render(); switchTab('standings'); toast('Backup imported');
+  }catch(err){ toast('Could not read that file'); } };
+  r.readAsText(f); e.target.value='';
+};
+$('#resetBtn').onclick=()=>confirmModal('Reset everything?','All players, schedules and results will be permanently erased.',()=>{
+  state=defaultState(); state.currentSessionId=state.sessions[0].id; save(); render(); switchTab('standings'); toast('Reset complete');
+});
+
+/* ============================================================
+   BOOT
+   ============================================================ */
+load();
+render();
+switchTab(state.ui.tab||'standings');
+if(!Store.persistent()){ setTimeout(()=>toast('Preview mode — saving works once deployed'),600); }
+</script>
+</body>
+</html>
