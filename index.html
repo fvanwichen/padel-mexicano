@@ -218,9 +218,19 @@ nav.tabs button.on::before{content:"";position:absolute;top:0;width:26px;height:
 .follow-strip .tx small{display:block;color:var(--txt-faint);font-weight:600;font-size:11.5px;margin-top:1px;}
 .follow-strip .chev{color:var(--txt-faint);font-weight:800;font-size:12px;}
 
-/* standings: you */
+/* standings: you + movement + sparkline */
 .rank-row.me{background:rgba(198,255,61,.06);}
-.rank-row.me-self .nm::after{content:"YOU";font-size:9px;font-weight:900;color:var(--accent-ink);background:var(--accent);padding:2px 6px;border-radius:6px;margin-left:8px;letter-spacing:.08em;}
+.nmrow{display:flex;align-items:center;gap:7px;min-width:0;}
+.rank-main .nm{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.move{flex:none;font-size:11px;font-weight:900;line-height:1;letter-spacing:.01em;}
+.move.up{color:var(--live);} .move.down{color:var(--danger);opacity:.85;}
+.move.new{font-size:9px;color:var(--accent);background:rgba(198,255,61,.14);padding:2px 5px;border-radius:5px;letter-spacing:.06em;}
+.youtag{flex:none;font-size:9px;font-weight:900;color:var(--accent-ink);background:var(--accent);padding:2px 6px;border-radius:6px;letter-spacing:.08em;}
+.sparkwrap{flex:none;color:var(--accent);opacity:.6;display:flex;align-items:center;margin:0 2px;}
+.rank-row.top1 .sparkwrap{opacity:.95;}
+.spark{display:block;}
+@keyframes rose{0%{background:rgba(198,255,61,.22);transform:translateY(7px);}55%{background:rgba(198,255,61,.10);}100%{background:transparent;transform:none;}}
+.rank-row.rose{animation:rose .9s cubic-bezier(.2,.8,.2,1) both;}
 
 /* who picker */
 .who-list{display:flex;flex-direction:column;gap:8px;max-height:48vh;overflow-y:auto;margin-bottom:4px;}
@@ -452,6 +462,7 @@ const CACHE_KEY = 'padelMexicano.tour', UI_KEY = 'padelMexicano.ui', OLD_KEY = '
 /* ---- state: T = shared tournament, L = local UI/role ---- */
 let T = null;
 let L = { tab:'now', standType:'ind', scope:'all', role:'viewer', me:null };
+let overtakeSnap = {};   // per-view rank snapshot for overtake animation
 
 /* cloud handles */
 let cloud = false, db = null, docRef = null, docExists = false, pushTimer = null;
@@ -553,11 +564,12 @@ function generateSchedule(numRounds){
    ============================================================ */
 function blankInd(){ return {pts:0,played:0,w:0,d:0,l:0,pf:0,pa:0}; }
 function teamKey(a,b){ return a<b?a+'~'+b:b+'~'+a; }
-function computeStandings(scope){
+function computeStandings(scope, includeFn){
   const sessions = scope==='session' ? [currentSession()] : T.sessions;
   const ind={}; T.players.forEach(p=>ind[p.id]=blankInd()); const team={};
   for(const ses of sessions) for(const rnd of ses.rounds) for(const m of rnd.matches){
     if(!m.done || m.scoreA==null || m.scoreB==null) continue;
+    if(includeFn && !includeFn(m,ses,rnd)) continue;
     const aWin=m.scoreA>m.scoreB, draw=m.scoreA===m.scoreB;
     const aPts=draw?1:(aWin?3:0), bPts=draw?1:(aWin?0:3);
     applyInd(ind,m.teamA,aPts,draw,aWin,m.scoreA,m.scoreB);
@@ -574,12 +586,49 @@ function applyTeam(team,players,pts,draw,won,pf,pa){ const k=teamKey(players[0],
   const s=team[k]; s.pts+=pts;s.played++;s.pf+=pf;s.pa+=pa; if(draw)s.d++; else if(won)s.w++; else s.l++; }
 function rankSort(arr){ return arr.sort((x,y)=> y.pts-x.pts || (y.pf-y.pa)-(x.pf-x.pa) || y.pf-x.pf || y.w-x.w); }
 
+/* movement + sparkline helpers (from data already on hand) */
+function latestCompletedRound(ses){ let n=0; ses.rounds.forEach(r=>{ if(r.matches.some(m=>m.done)) n=Math.max(n,r.n); }); return n; }
+function cumulativeSeries(scope){
+  const sessions = scope==='session' ? [currentSession()] : T.sessions;
+  const series={}, run={}; T.players.forEach(p=>{ series[p.id]=[]; run[p.id]=0; });
+  sessions.forEach(s=> s.rounds.forEach(r=>{
+    if(!r.matches.some(m=>m.done)) return;
+    r.matches.forEach(m=>{ if(!m.done||m.scoreA==null||m.scoreB==null) return;
+      const aWin=m.scoreA>m.scoreB, draw=m.scoreA===m.scoreB, aPts=draw?1:(aWin?3:0), bPts=draw?1:(aWin?0:3);
+      m.teamA.forEach(p=>run[p]+=aPts); m.teamB.forEach(p=>run[p]+=bPts); });
+    T.players.forEach(p=>series[p.id].push(run[p.id]));
+  }));
+  return series;
+}
+function sparkline(vals,max){
+  if(!vals||vals.length<2) return '';
+  vals=vals.slice(-12); const w=52,h=20,pad=2.5,n=vals.length,mx=Math.max(max,1);
+  const pts=vals.map((v,i)=>[pad+(i/(n-1))*(w-2*pad), h-pad-(v/mx)*(h-2*pad)]);
+  const d=pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');
+  const last=pts[n-1];
+  return `<svg class="spark" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" preserveAspectRatio="none"><path d="${d}" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/><circle cx="${last[0].toFixed(1)}" cy="${last[1].toFixed(1)}" r="2" fill="currentColor"/></svg>`;
+}
+
 /* ============================================================
    RENDER
    ============================================================ */
 const $ = s=>document.querySelector(s);
 const el=(t,c,h)=>{const e=document.createElement(t); if(c)e.className=c; if(h!=null)e.innerHTML=h; return e;};
 function esc(s){ return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+/* ---- haptics: real on Android (Vibration API); best-effort on iOS via a hidden switch ---- */
+let _hapticEl=null;
+function initHaptic(){ try{
+  const l=document.createElement('label'); l.setAttribute('aria-hidden','true');
+  l.style.cssText='position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;pointer-events:none;left:-9999px;';
+  const c=document.createElement('input'); c.type='checkbox'; c.setAttribute('switch',''); c.tabIndex=-1;
+  l.appendChild(c); document.body.appendChild(l); _hapticEl=l;
+}catch(e){} }
+function haptic(kind){
+  const v={tap:10, save:[16], win:[18,45,18,45,30]}[kind]||10;
+  if(navigator.vibrate){ try{ navigator.vibrate(v); }catch(e){} }
+  if(_hapticEl){ const n = kind==='win'?3:1; for(let i=0;i<n;i++) setTimeout(()=>{ try{_hapticEl.click();}catch(e){} }, i*70); }
+}
 
 function render(){
   document.body.dataset.role = cloud ? L.role : 'admin';
@@ -603,32 +652,66 @@ function renderStandings(){
   document.querySelectorAll('#standType button').forEach(b=>b.classList.toggle('on',b.dataset.st===standType));
   document.querySelectorAll('#scopeRow button').forEach(b=>b.classList.toggle('on',b.dataset.scope===scope));
   const {ind,team}=computeStandings(scope);
+  // previous-round snapshot for ▲▼ movement
+  const ses=currentSession(), Lr=latestCompletedRound(ses);
+  const hasPrev = Lr>0 && ses.rounds.some(r=>r.n<Lr && r.matches.some(m=>m.done));
+  const prevS = hasPrev ? computeStandings(scope,(m,s,r)=> !(s.id===ses.id && r.n===Lr)) : null;
+  // overtake-animation snapshot (per view, since last render)
+  const viewKey = standType+'|'+scope+'|'+(scope==='session'?T.currentSessionId:'');
+  const snap = overtakeSnap[viewKey];
+  const nextSnap = {};
   const list=$('#standingsList'); list.innerHTML='';
   if(standType==='ind'){
     const rows=rankSort(T.players.map(p=>({id:p.id,name:p.name,...ind[p.id]})));
     const any=rows.some(r=>r.played>0);
     $('#standingsHint').textContent = any ? rows[0].name.split(' ')[0]+' leads' : '';
-    if(!any) list.appendChild(emptyState('No results yet','Once matches are saved, the player ranking builds up here.'));
-    else rows.forEach((r,i)=>list.appendChild(rankRow(i,r.name,r)));
+    if(!any){ list.appendChild(emptyState('No results yet','Once matches are saved, the player ranking builds up here.')); overtakeSnap[viewKey]={}; }
+    else {
+      const prevIdx = prevS ? Object.fromEntries(rankSort(T.players.map(p=>({id:p.id,...prevS.ind[p.id]}))).map((r,i)=>[r.id,i])) : null;
+      const series = cumulativeSeries(scope); let smax=1; Object.values(series).forEach(a=>a.forEach(v=>{ if(v>smax)smax=v; }));
+      rows.forEach((r,i)=>{ nextSnap[r.id]=i;
+        const move = prevIdx ? (prevIdx[r.id]-i) : null;
+        const rose = snap && snap[r.id]!=null && i<snap[r.id];
+        list.appendChild(rankRow(i,r.name,r,{move, rose, spark:r.played?sparkline(series[r.id],smax):''}));
+      });
+    }
     $('#standingsNote').textContent='3 points for a win, 1 for a draw. Ties broken by point difference.';
   } else {
     const rows=rankSort(Object.values(team).map(t=>({...t,name:playerName(t.a)+' & '+playerName(t.b)})));
     $('#standingsHint').textContent = rows.length ? rows.length+' teams' : '';
-    if(!rows.length) list.appendChild(emptyState('No teams yet','Each pairing happens once per day — team points stack up across days.'));
-    else rows.forEach((r,i)=>list.appendChild(rankRow(i,r.name,r)));
+    if(!rows.length){ list.appendChild(emptyState('No teams yet','Each pairing happens once per day — team points stack up across days.')); overtakeSnap[viewKey]={}; }
+    else {
+      const prevIdx = prevS ? Object.fromEntries(rankSort(Object.values(prevS.team)).map((r,i)=>[teamKey(r.a,r.b),i])) : null;
+      rows.forEach((r,i)=>{ const k=teamKey(r.a,r.b); nextSnap[k]=i;
+        const move = prevIdx ? (prevIdx[k]!=null? prevIdx[k]-i : 'new') : null;
+        const rose = snap && snap[k]!=null && i<snap[k];
+        list.appendChild(rankRow(i,r.name,r,{move, rose, spark:''}));
+      });
+    }
     $('#standingsNote').textContent='A team = one pair of players, carrying points across every day you play.';
   }
+  overtakeSnap[viewKey]=nextSnap;
 }
-function rankRow(i,name,row){
+function rankRow(i,name,row,opts){
+  opts=opts||{};
   const s=row;
   const mineSelf = row.id && row.id===L.me;
   const mine = mineSelf || (L.me && (row.a===L.me || row.b===L.me));
   const top=i===0?'top1':i===1?'top2':i===2?'top3':'';
   const diff=s.pf-s.pa, dCls=diff>0?'pos':diff<0?'neg':'';
   const wdl=`<b>${s.w}</b>W · <b>${s.d}</b>D · <b>${s.l}</b>L  <span class="diff ${dCls}">${diff>0?'+':''}${diff}</span>`;
-  const r=el('div','rank-row stagger '+top+(mine?' me':'')+(mineSelf?' me-self':'')); r.style.animationDelay=(i*0.035)+'s';
+  let mv=''; const v=opts.move;
+  if(v!=null){ if(v==='new') mv='<span class="move new">NEW</span>';
+    else if(v>0) mv=`<span class="move up">▲${v}</span>`;
+    else if(v<0) mv=`<span class="move down">▼${-v}</span>`; }
+  const youtag = mineSelf ? '<span class="youtag">YOU</span>' : '';
+  const r=el('div','rank-row stagger '+top+(mine?' me':'')+(mineSelf?' me-self':'')+(opts.rose?' rose':'')); r.style.animationDelay=(i*0.035)+'s';
   r.innerHTML=`<div class="rk tnum">${i+1}</div>
-    <div class="rank-main"><div class="nm">${esc(name)}</div><div class="wdl tnum">${s.played?wdl:'—'}</div></div>
+    <div class="rank-main">
+      <div class="nmrow"><span class="nm">${esc(name)}</span>${mv}${youtag}</div>
+      <div class="wdl tnum">${s.played?wdl:'—'}</div>
+    </div>
+    ${opts.spark?('<div class="sparkwrap">'+opts.spark+'</div>'):''}
     <div class="pts"><div class="big tnum">${s.pts}</div><div class="lbl">pts</div></div>`;
   return r;
 }
@@ -680,7 +763,7 @@ function matchEl(m){
     };
     if(inpA) inpA.oninput=()=>sync('scoreA',inpA.value);
     if(inpB) inpB.oninput=()=>sync('scoreB',inpB.value);
-    wrap.querySelectorAll('.score-step').forEach(btn=>{ btn.onclick=()=>{
+    wrap.querySelectorAll('.score-step').forEach(btn=>{ btn.onclick=()=>{ haptic('tap');
       const side=btn.dataset.s, field=side==='A'?'scoreA':'scoreB', nv=Math.max(0,(m[field]||0)+(btn.dataset.d==='1'?1:-1));
       const inp=side==='A'?inpA:inpB; if(inp) inp.value=nv; sync(field,nv);
     }; });
@@ -692,7 +775,7 @@ function matchEl(m){
     if(canScore()){ const edit=el('button','btn btn-ghost btn-sm','Edit'); edit.onclick=()=>{m.done=false;commit();render();}; foot.appendChild(edit); }
   } else if(canScore()){
     const sv=el('button','btn btn-primary btn-sm','Save result'); sv.style.flex='1';
-    sv.onclick=()=>{ if(m.scoreA==null)m.scoreA=0; if(m.scoreB==null)m.scoreB=0; m.done=true; commit(); render(); toast('Result saved'); };
+    sv.onclick=()=>{ haptic('save'); if(m.scoreA==null)m.scoreA=0; if(m.scoreB==null)m.scoreB=0; m.done=true; commit(); render(); toast('Result saved'); };
     foot.appendChild(sv);
   } else {
     foot.appendChild(el('span','tag-pending','Not played yet'));
@@ -780,7 +863,7 @@ function renderWinner(body,ses){
   const vb=el('button','btn btn-ghost','View full standings'); vb.onclick=()=>switchTab('standings'); body.appendChild(vb);
   if(canAdmin()){ const nd=el('button','btn btn-primary','Start a new day'); nd.style.marginTop='10px';
     nd.onclick=()=>{ const n=T.sessions.length+1, s=newSession(n); T.sessions.push(s); T.currentSessionId=s.id; commit(); render(); toast('Started '+s.name); }; body.appendChild(nd); }
-  if(lastCompleteId!==ses.id){ lastCompleteId=ses.id; setTimeout(burstConfetti,250); }
+  if(lastCompleteId!==ses.id){ lastCompleteId=ses.id; haptic('win'); setTimeout(burstConfetti,250); }
 }
 function burstConfetti(){
   const c=$('#confetti'); if(!c||!c.getContext) return; const ctx=c.getContext('2d');
@@ -910,6 +993,7 @@ $('#whoBack').onclick=e=>{ if(e.target===$('#whoBack')) $('#whoBack').classList.
    BOOT
    ============================================================ */
 loadLocal();
+initHaptic();
 T = loadTourCache() || defaultTour();
 ensureSession();
 render();
