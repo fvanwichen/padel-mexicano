@@ -191,6 +191,64 @@ nav.tabs button.on::before{content:"";position:absolute;top:0;width:26px;height:
 .stack>*{margin-bottom:12px;}
 .row2{display:flex;gap:10px;}.row2>*{flex:1;}
 
+/* Now screen */
+.now-prog{display:flex;align-items:center;gap:10px;margin:2px 2px 14px;}
+.now-prog .rnum{font-size:12px;font-weight:900;color:var(--accent);letter-spacing:.06em;}
+.now-prog .bar{flex:1;height:6px;border-radius:99px;background:var(--surface-2);overflow:hidden;}
+.now-prog .bar i{display:block;height:100%;background:var(--accent);border-radius:99px;transition:width .4s;}
+.now-prog .ct{font-size:11px;font-weight:700;color:var(--txt-faint);white-space:nowrap;}
+.you-banner{display:flex;align-items:center;gap:11px;background:rgba(198,255,61,.09);border:1px solid rgba(198,255,61,.3);border-radius:14px;padding:13px 15px;margin-bottom:14px;}
+.you-banner .ic{width:30px;height:30px;flex:none;border-radius:9px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-weight:900;font-size:15px;}
+.you-banner .t{font-size:13.5px;font-weight:700;line-height:1.45;}
+.you-banner .t b{color:var(--accent);}
+.you-banner.rest{background:var(--surface-2);border-color:var(--line);}
+.you-banner.rest .ic{background:var(--surface-3);color:var(--txt-dim);}
+.match.mine{position:relative;}
+.match.mine::before{content:"";position:absolute;left:-1px;top:8px;bottom:8px;width:3px;border-radius:2px;background:var(--accent);}
+.entry-hint{font-size:11px;color:var(--txt-faint);font-weight:600;text-align:center;margin-top:11px;}
+.next-mini{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line-soft);font-size:13px;font-weight:600;color:var(--txt-dim);}
+.next-mini:last-child{border-bottom:none;}
+.next-mini .cc{font-size:10px;font-weight:800;color:var(--txt-faint);text-transform:uppercase;letter-spacing:.05em;min-width:50px;}
+.next-mini.mine{color:var(--txt);background:rgba(198,255,61,.05);} .next-mini.mine .cc{color:var(--accent);}
+
+/* follow self */
+.follow-strip{display:flex;align-items:center;gap:11px;background:var(--surface);border:1px solid var(--line-soft);border-radius:13px;padding:11px 14px;margin-bottom:14px;}
+.follow-strip .ic{width:28px;height:28px;border-radius:8px;background:var(--surface-3);color:var(--accent);display:grid;place-items:center;flex:none;font-weight:900;}
+.follow-strip .tx{flex:1;font-size:13.5px;font-weight:700;}
+.follow-strip .tx small{display:block;color:var(--txt-faint);font-weight:600;font-size:11.5px;margin-top:1px;}
+.follow-strip .chev{color:var(--txt-faint);font-weight:800;font-size:12px;}
+
+/* standings: you */
+.rank-row.me{background:rgba(198,255,61,.06);}
+.rank-row.me-self .nm::after{content:"YOU";font-size:9px;font-weight:900;color:var(--accent-ink);background:var(--accent);padding:2px 6px;border-radius:6px;margin-left:8px;letter-spacing:.08em;}
+
+/* who picker */
+.who-list{display:flex;flex-direction:column;gap:8px;max-height:48vh;overflow-y:auto;margin-bottom:4px;}
+.who-opt{display:flex;align-items:center;gap:11px;padding:13px 15px;border-radius:12px;background:var(--surface-2);border:1px solid var(--line);font-size:15.5px;font-weight:700;text-align:left;width:100%;color:var(--txt);}
+.who-opt:active{background:var(--surface-3);}
+.who-opt.sel{border-color:var(--accent);background:rgba(198,255,61,.08);}
+.who-opt .n{width:26px;height:26px;border-radius:7px;background:var(--surface-3);color:var(--txt-dim);display:grid;place-items:center;font-size:12px;font-weight:800;flex:none;}
+
+/* winner reveal */
+.reveal{text-align:center;padding:10px 6px 4px;}
+.reveal .crown{font-size:42px;line-height:1;margin-bottom:8px;}
+.reveal .champ-lbl{font-size:11px;font-weight:900;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);}
+.reveal .champ{font-size:30px;font-weight:900;letter-spacing:-.03em;margin:6px 0 3px;}
+.reveal .champ-sub{font-size:13px;color:var(--txt-dim);font-weight:600;margin-bottom:22px;}
+.podium{display:flex;align-items:flex-end;justify-content:center;gap:8px;margin-bottom:18px;}
+.pod{flex:1;max-width:118px;background:var(--surface);border:1px solid var(--line-soft);border-radius:14px 14px 0 0;padding:12px 6px 14px;}
+.pod .medal{font-size:13px;font-weight:900;margin-bottom:6px;letter-spacing:.04em;}
+.pod .pn{font-size:13.5px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pod .pp{font-size:11px;color:var(--txt-faint);font-weight:700;margin-top:3px;}
+.pod.p1{background:linear-gradient(180deg,rgba(255,210,74,.18),var(--surface));border-color:rgba(255,210,74,.4);padding-bottom:26px;}
+.pod.p2{padding-bottom:16px;} .pod.p3{padding-bottom:10px;}
+.pod.p1 .medal{color:var(--gold);} .pod.p2 .medal{color:var(--silver);} .pod.p3 .medal{color:var(--bronze);}
+.reveal-stat{margin-bottom:14px;}
+.reveal-stat .rs{background:var(--surface);border:1px solid var(--line-soft);border-radius:13px;padding:14px;text-align:center;}
+.reveal-stat .rs .k{font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--txt-faint);}
+.reveal-stat .rs .v{font-size:16px;font-weight:800;margin-top:5px;}
+#confetti{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:85;}
+
 /* role-based visibility: default (no attr) shows all (local mode) */
 body[data-role="viewer"] .need-score,
 body[data-role="viewer"] .need-admin,
@@ -227,8 +285,14 @@ body[data-role="scorekeeper"] .need-admin{display:none !important;}
   </header>
 
   <main>
+    <!-- NOW -->
+    <section class="screen active" id="screen-now">
+      <div class="sec-head"><h2>Now</h2><span class="hint" id="nowHint"></span></div>
+      <div id="nowBody"></div>
+    </section>
+
     <!-- STANDINGS -->
-    <section class="screen active" id="screen-standings">
+    <section class="screen" id="screen-standings">
       <div class="sec-head"><h2>Standings</h2><span class="hint" id="standingsHint"></span></div>
       <div class="seg" id="standType">
         <button data-st="ind" class="on">Players</button>
@@ -257,7 +321,7 @@ body[data-role="scorekeeper"] .need-admin{display:none !important;}
 
     <!-- RULES -->
     <section class="screen" id="screen-rules">
-      <div class="sec-head"><h2>Rules</h2><span class="hint">How we play</span></div>
+      <div class="sec-head"><h2>Rules</h2><button class="btn btn-ghost btn-sm" id="rulesBack">‹ Back</button></div>
       <p class="rules-intro">Eight players, two courts. You get a new partner every round and never play with the same teammate twice in a day — so by the end you've partnered everyone.</p>
       <div class="lab-sec">The match</div>
       <div class="card rules" style="margin-bottom:18px">
@@ -284,6 +348,11 @@ body[data-role="scorekeeper"] .need-admin{display:none !important;}
       <div class="sec-head"><h2>Setup</h2></div>
 
       <div id="accessSection"></div>
+
+      <div class="card" style="margin-bottom:18px">
+        <div class="field" id="meField"></div>
+        <div class="field" style="border-bottom:none"><div class="lab">How to play<small>Format &amp; match rules</small></div><button class="btn btn-ghost btn-sm" id="rulesBtn">View</button></div>
+      </div>
 
       <div class="need-admin">
         <div class="card" id="settingsCard" style="margin-bottom:18px">
@@ -315,7 +384,10 @@ body[data-role="scorekeeper"] .need-admin{display:none !important;}
   </main>
 
   <nav class="tabs">
-    <button data-tab="standings" class="on">
+    <button data-tab="now" class="on">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8z" stroke-linejoin="round"/></svg>Now
+    </button>
+    <button data-tab="standings">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 21V9m7 12V3m7 18v-7" stroke-linecap="round"/></svg>Standings
     </button>
     <button data-tab="schedule">
@@ -323,9 +395,6 @@ body[data-role="scorekeeper"] .need-admin{display:none !important;}
     </button>
     <button data-tab="players">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0" stroke-linecap="round"/><path d="M16 5.2a3.2 3.2 0 0 1 0 5.6M17.5 20a5.5 5.5 0 0 0-2.2-4.4" stroke-linecap="round"/></svg>Players
-    </button>
-    <button data-tab="rules">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3V4z" stroke-linejoin="round"/><path d="M5 4a2 2 0 0 0-2 2v11a3 3 0 0 1 3-3h2" stroke-linecap="round"/><path d="M9 8.5h6M9 12h4" stroke-linecap="round"/></svg>Rules
     </button>
     <button data-tab="more">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3M5 5l2 2m10 10 2 2M19 5l-2 2M7 17l-2 2" stroke-linecap="round"/></svg>More
@@ -350,6 +419,16 @@ body[data-role="scorekeeper"] .need-admin{display:none !important;}
   </div>
 </div>
 
+<div class="modal-back" id="whoBack">
+  <div class="modal">
+    <h3>Who are you?</h3>
+    <p>Pick yourself to highlight your matches and your spot in the standings. Saved only on this phone.</p>
+    <div class="who-list" id="whoList"></div>
+    <button class="btn btn-ghost" id="whoCancel" style="margin-top:8px">Close</button>
+  </div>
+</div>
+<canvas id="confetti"></canvas>
+
 <script>
 /* ============================================================
    CONFIG  —  EDIT THESE TWO BLOCKS, then re-upload the file.
@@ -372,7 +451,7 @@ const CACHE_KEY = 'padelMexicano.tour', UI_KEY = 'padelMexicano.ui', OLD_KEY = '
 
 /* ---- state: T = shared tournament, L = local UI/role ---- */
 let T = null;
-let L = { tab:'standings', standType:'ind', scope:'all', role:'viewer' };
+let L = { tab:'now', standType:'ind', scope:'all', role:'viewer', me:null };
 
 /* cloud handles */
 let cloud = false, db = null, docRef = null, docExists = false, pushTimer = null;
@@ -506,6 +585,7 @@ function render(){
   document.body.dataset.role = cloud ? L.role : 'admin';
   renderStatus();
   $('#dayLabel').textContent = currentSession().name;
+  renderNow();
   renderStandings();
   renderSchedule();
   renderPlayers();
@@ -539,15 +619,18 @@ function renderStandings(){
     $('#standingsNote').textContent='A team = one pair of players, carrying points across every day you play.';
   }
 }
-function rankRow(i,name,s){
+function rankRow(i,name,row){
+  const s=row;
+  const mineSelf = row.id && row.id===L.me;
+  const mine = mineSelf || (L.me && (row.a===L.me || row.b===L.me));
   const top=i===0?'top1':i===1?'top2':i===2?'top3':'';
   const diff=s.pf-s.pa, dCls=diff>0?'pos':diff<0?'neg':'';
   const wdl=`<b>${s.w}</b>W · <b>${s.d}</b>D · <b>${s.l}</b>L  <span class="diff ${dCls}">${diff>0?'+':''}${diff}</span>`;
-  const row=el('div','rank-row stagger '+top); row.style.animationDelay=(i*0.035)+'s';
-  row.innerHTML=`<div class="rk tnum">${i+1}</div>
+  const r=el('div','rank-row stagger '+top+(mine?' me':'')+(mineSelf?' me-self':'')); r.style.animationDelay=(i*0.035)+'s';
+  r.innerHTML=`<div class="rk tnum">${i+1}</div>
     <div class="rank-main"><div class="nm">${esc(name)}</div><div class="wdl tnum">${s.played?wdl:'—'}</div></div>
     <div class="pts"><div class="big tnum">${s.pts}</div><div class="lbl">pts</div></div>`;
-  return row;
+  return r;
 }
 
 function renderSchedule(){
@@ -577,12 +660,32 @@ function renderSchedule(){
   }
 }
 function matchEl(m){
-  const wrap=el('div','match');
+  const editable = canScore() && !m.done;
+  const isMine = L.me && (m.teamA.includes(L.me)||m.teamB.includes(L.me));
+  const wrap=el('div','match'+(isMine?' mine':''));
   wrap.appendChild(el('div','court-chip',`<span class="ci">▮</span> Court ${m.court}`));
   const aWin=m.done&&m.scoreA>m.scoreB, bWin=m.done&&m.scoreB>m.scoreA, draw=m.done&&m.scoreA===m.scoreB;
-  wrap.appendChild(teamLine(m,'A',aWin,bWin));
+  wrap.appendChild(teamLine(m,'A',aWin,bWin,editable));
   wrap.appendChild(el('div','vs-mid','<span class="ln"></span><span>VS</span><span class="ln"></span>'));
-  wrap.appendChild(teamLine(m,'B',bWin,aWin));
+  wrap.appendChild(teamLine(m,'B',bWin,aWin,editable));
+  if(editable){
+    const inpA=wrap.querySelector('[data-side="A"] input'), inpB=wrap.querySelector('[data-side="B"] input');
+    const target=T.settings.pointTarget||24;
+    const sync=(field,raw)=>{
+      const val=(raw===''||raw==null)?null:Math.max(0,parseInt(raw)||0);
+      m[field]=val;
+      const other=field==='scoreA'?'scoreB':'scoreA', oInp=field==='scoreA'?inpB:inpA;
+      if(val!=null){ const comp=Math.max(0,target-val); m[other]=comp; if(oInp) oInp.value=comp; }
+      commit();
+    };
+    if(inpA) inpA.oninput=()=>sync('scoreA',inpA.value);
+    if(inpB) inpB.oninput=()=>sync('scoreB',inpB.value);
+    wrap.querySelectorAll('.score-step').forEach(btn=>{ btn.onclick=()=>{
+      const side=btn.dataset.s, field=side==='A'?'scoreA':'scoreB', nv=Math.max(0,(m[field]||0)+(btn.dataset.d==='1'?1:-1));
+      const inp=side==='A'?inpA:inpB; if(inp) inp.value=nv; sync(field,nv);
+    }; });
+    wrap.appendChild(el('div','entry-hint',`Type one score — the other fills to ${target}.`));
+  }
   const foot=el('div','match-foot');
   if(m.done){
     foot.appendChild(el('span','tag-done'+(draw?' tag-draw':''), draw?'◷ Draw — 1 pt each':'✓ Saved'));
@@ -597,21 +700,18 @@ function matchEl(m){
   wrap.appendChild(foot);
   return wrap;
 }
-function teamLine(m,side,win,loss){
+function teamLine(m,side,win,loss,editable){
   const team=side==='A'?m.teamA:m.teamB, field=side==='A'?'scoreA':'scoreB';
   const line=el('div','team-line team'+(win?' win':loss?' loss':''));
-  line.innerHTML=`<div class="team-names">${esc(playerName(team[0]))}<span class="amp">&amp;</span>${esc(playerName(team[1]))}</div>`;
-  const box=el('div','score-box');
-  if(m.done || !canScore()){
+  const nm=id=> id===L.me ? `<span style="color:var(--accent)">${esc(playerName(id))}</span>` : esc(playerName(id));
+  line.innerHTML=`<div class="team-names">${nm(team[0])}<span class="amp">&amp;</span>${nm(team[1])}</div>`;
+  const box=el('div','score-box'); box.dataset.side=side;
+  if(!editable){
     box.innerHTML=`<div class="score-static tnum">${m[field]==null?'·':m[field]}</div>`;
   } else {
-    const dec=el('button','score-step','−');
+    const dec=el('button','score-step'); dec.dataset.s=side; dec.dataset.d='-1'; dec.textContent='−';
     const inp=el('input','score-val tnum'); inp.type='number'; inp.inputMode='numeric'; inp.value=m[field]??''; inp.placeholder='0'; inp.min=0;
-    const inc=el('button','score-step','+');
-    const setv=v=>{ v=Math.max(0,v|0); m[field]=v; inp.value=v; commit(); };
-    dec.onclick=()=>setv((m[field]||0)-1);
-    inc.onclick=()=>setv((m[field]||0)+1);
-    inp.oninput=()=>{ m[field]= inp.value===''?null:Math.max(0,parseInt(inp.value)||0); commit(); };
+    const inc=el('button','score-step'); inc.dataset.s=side; inc.dataset.d='1'; inc.textContent='+';
     box.append(dec,inp,inc);
   }
   line.appendChild(box);
@@ -619,6 +719,87 @@ function teamLine(m,side,win,loss){
 }
 function doGenerate(){ const ses=currentSession(); ses.rounds=generateSchedule(Math.min(T.settings.defaultRounds,MAX_ROUNDS));
   commit(); render(); toast('Schedule ready · '+ses.rounds.length+' rounds'); }
+
+/* ---- Now screen + you-lens + winner reveal ---- */
+let lastCompleteId=null;
+function currentRoundIdx(ses){ for(let i=0;i<ses.rounds.length;i++){ if(ses.rounds[i].matches.some(m=>!m.done)) return i; } return -1; }
+function followStrip(){
+  const s=el('div','follow-strip'); s.style.cursor='pointer'; s.onclick=openWho;
+  if(L.me) s.innerHTML=`<div class="ic">★</div><div class="tx">Following you<small>${esc(playerName(L.me))}</small></div><div class="chev">Change ›</div>`;
+  else s.innerHTML=`<div class="ic">＋</div><div class="tx">Follow yourself<small>Highlight your matches &amp; ranking</small></div><div class="chev">Pick ›</div>`;
+  return s;
+}
+function renderNow(){
+  const ses=currentSession(); const body=$('#nowBody'); if(!body) return; body.innerHTML=''; $('#nowHint').textContent='';
+  body.appendChild(followStrip());
+  if(!ses.rounds.length){
+    if(canAdmin()){ body.appendChild(emptyState('Ready to start',`Generate ${T.settings.defaultRounds} rounds and the first matches show up right here.`));
+      const gen=el('button','btn btn-primary','⚡  Generate schedule'); gen.onclick=doGenerate; body.appendChild(gen); }
+    else body.appendChild(emptyState('Waiting to start','The organizer will set the draw — your first match appears here automatically.'));
+    return;
+  }
+  const idx=currentRoundIdx(ses);
+  if(idx===-1){ renderWinner(body,ses); return; }
+  const rnd=ses.rounds[idx], total=rnd.matches.length, done=rnd.matches.filter(m=>m.done).length;
+  $('#nowHint').textContent=`Round ${rnd.n} of ${ses.rounds.length}`;
+  const prog=el('div','now-prog'); prog.innerHTML=`<span class="rnum">ROUND ${rnd.n}</span><span class="bar"><i style="width:${total?Math.round(done/total*100):0}%"></i></span><span class="ct">${done}/${total} in</span>`;
+  body.appendChild(prog);
+  if(L.me){
+    const mine=rnd.matches.find(m=>m.teamA.includes(L.me)||m.teamB.includes(L.me));
+    if(mine){ const onA=mine.teamA.includes(L.me), partner=(onA?mine.teamA:mine.teamB).find(x=>x!==L.me), opp=onA?mine.teamB:mine.teamA;
+      const b=el('div','you-banner'); b.innerHTML=`<div class="ic">▸</div><div class="t">You're on <b>Court ${mine.court}</b> with ${esc(playerName(partner))}<br>vs ${esc(playerName(opp[0]))} &amp; ${esc(playerName(opp[1]))}</div>`; body.appendChild(b);
+    } else { const b=el('div','you-banner rest'); b.innerHTML=`<div class="ic">●</div><div class="t">You're resting this round.</div>`; body.appendChild(b); }
+  }
+  const c=el('div','card round-card'); c.appendChild(el('div','round-head',`<span class="rn">ROUND ${rnd.n} · NOW</span><span class="meta">${total} courts</span>`));
+  rnd.matches.forEach(m=>c.appendChild(matchEl(m))); body.appendChild(c);
+  if(idx+1<ses.rounds.length){
+    const nx=ses.rounds[idx+1]; body.appendChild(el('div','lab-sec','Up next · Round '+nx.n));
+    const card=el('div','card');
+    nx.matches.forEach(m=>{ const mine=L.me&&(m.teamA.includes(L.me)||m.teamB.includes(L.me));
+      const row=el('div','next-mini'+(mine?' mine':''));
+      row.innerHTML=`<span class="cc">Court ${m.court}</span><span>${esc(playerName(m.teamA[0]))} &amp; ${esc(playerName(m.teamA[1]))} <span style="color:var(--txt-faint)">v</span> ${esc(playerName(m.teamB[0]))} &amp; ${esc(playerName(m.teamB[1]))}</span>`;
+      card.appendChild(row); });
+    body.appendChild(card);
+  }
+}
+function renderWinner(body,ses){
+  const {ind,team}=computeStandings('session');
+  const irows=rankSort(T.players.map(p=>({id:p.id,name:p.name,...ind[p.id]}))).filter(r=>r.played>0);
+  const trows=rankSort(Object.values(team).map(t=>({...t,name:playerName(t.a)+' & '+playerName(t.b)})));
+  $('#nowHint').textContent=ses.name+' complete';
+  if(!irows.length){ body.appendChild(emptyState('Day complete','No results were recorded for '+ses.name+'.')); return; }
+  const champ=irows[0];
+  const wrap=el('div','reveal');
+  wrap.innerHTML=`<div class="crown">🏆</div><div class="champ-lbl">${esc(ses.name)} champion</div><div class="champ">${esc(champ.name)}</div><div class="champ-sub">${champ.pts} pts · ${champ.w}W ${champ.d}D ${champ.l}L</div>`;
+  const pod=el('div','podium');
+  [1,0,2].forEach(ri=>{ const r=irows[ri]; if(!r)return; const cls=ri===0?'p1':ri===1?'p2':'p3', medal=ri===0?'1st':ri===1?'2nd':'3rd';
+    const p=el('div','pod '+cls); p.innerHTML=`<div class="medal">${medal}</div><div class="pn">${esc(r.name.split(' ')[0])}</div><div class="pp">${r.pts} pts</div>`; pod.appendChild(p); });
+  wrap.appendChild(pod);
+  if(trows.length){ const bd=trows[0]; const rs=el('div','reveal-stat'); rs.innerHTML=`<div class="rs"><div class="k">Best duo of the day</div><div class="v">${esc(bd.name)} · ${bd.pts} pts</div></div>`; wrap.appendChild(rs); }
+  body.appendChild(wrap);
+  const vb=el('button','btn btn-ghost','View full standings'); vb.onclick=()=>switchTab('standings'); body.appendChild(vb);
+  if(canAdmin()){ const nd=el('button','btn btn-primary','Start a new day'); nd.style.marginTop='10px';
+    nd.onclick=()=>{ const n=T.sessions.length+1, s=newSession(n); T.sessions.push(s); T.currentSessionId=s.id; commit(); render(); toast('Started '+s.name); }; body.appendChild(nd); }
+  if(lastCompleteId!==ses.id){ lastCompleteId=ses.id; setTimeout(burstConfetti,250); }
+}
+function burstConfetti(){
+  const c=$('#confetti'); if(!c||!c.getContext) return; const ctx=c.getContext('2d');
+  const W=c.width=innerWidth, H=c.height=innerHeight, cols=['#c6ff3d','#5ec8ff','#ffd24a','#ffffff','#52e08a'], P=[];
+  for(let i=0;i<130;i++) P.push({x:Math.random()*W,y:-20-Math.random()*H*0.5,r:4+Math.random()*5,c:cols[i%cols.length],vy:2+Math.random()*3.2,vx:-1.6+Math.random()*3.2,rot:Math.random()*6,vr:-.25+Math.random()*.5});
+  const t0=performance.now();
+  (function frame(t){ ctx.clearRect(0,0,W,H);
+    P.forEach(p=>{ p.x+=p.vx;p.y+=p.vy;p.vy+=0.04;p.rot+=p.vr; ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot); ctx.fillStyle=p.c; ctx.fillRect(-p.r,-p.r*.6,p.r*2,p.r*1.2); ctx.restore(); });
+    if(t-t0<2700) requestAnimationFrame(frame); else ctx.clearRect(0,0,W,H);
+  })(t0);
+}
+function openWho(){
+  const list=$('#whoList'); list.innerHTML='';
+  T.players.forEach((p,i)=>{ const o=el('button','who-opt'+(L.me===p.id?' sel':'')); o.innerHTML=`<span class="n tnum">${i+1}</span>${esc(p.name)}`;
+    o.onclick=()=>{ L.me=p.id; saveLocal(); $('#whoBack').classList.remove('show'); render(); toast('Following '+p.name); }; list.appendChild(o); });
+  const clr=el('button','who-opt'); clr.style.justifyContent='center'; clr.style.color='var(--txt-faint)'; clr.textContent='Just watching (no one)';
+  clr.onclick=()=>{ L.me=null; saveLocal(); $('#whoBack').classList.remove('show'); render(); toast('Following no one'); }; list.appendChild(clr);
+  $('#whoBack').classList.add('show');
+}
 
 function renderPlayers(){
   const list=$('#playerList'); list.innerHTML='';
@@ -638,6 +819,9 @@ function renderMore(){
   $('#ptVal').textContent=T.settings.pointTarget;
   $('#rdVal').textContent=T.settings.defaultRounds;
   renderAccess();
+  const me=$('#meField');
+  if(me){ me.innerHTML=`<div class="lab">You are<small>${L.me?'Following your matches &amp; ranking':'Tap to follow yourself'}</small></div>`;
+    const mb=el('button','btn btn-ghost btn-sm', L.me?esc(playerName(L.me)):'Choose'); mb.onclick=openWho; me.appendChild(mb); }
   const list=$('#sessionList'); list.innerHTML='';
   T.sessions.forEach((s)=>{
     const played=s.rounds.reduce((a,r)=>a+r.matches.filter(m=>m.done).length,0);
@@ -717,6 +901,10 @@ $('#importFile').onchange=e=>{ const f=e.target.files[0]; if(!f)return; const r=
     catch(err){ toast('Could not read that file'); } }; r.readAsText(f); e.target.value=''; };
 $('#resetBtn').onclick=()=>{ if(!canAdmin())return; confirmModal('Reset everything?','All players, schedules and results will be permanently erased for everyone.',()=>{
   T=defaultTour(); ensureSession(); commit(); render(); switchTab('standings'); toast('Reset complete'); }); };
+{ const rb=$('#rulesBtn'); if(rb) rb.onclick=()=>switchTab('rules'); }
+{ const rbk=$('#rulesBack'); if(rbk) rbk.onclick=()=>switchTab('more'); }
+$('#whoCancel').onclick=()=>$('#whoBack').classList.remove('show');
+$('#whoBack').onclick=e=>{ if(e.target===$('#whoBack')) $('#whoBack').classList.remove('show'); };
 
 /* ============================================================
    BOOT
@@ -725,7 +913,7 @@ loadLocal();
 T = loadTourCache() || defaultTour();
 ensureSession();
 render();
-switchTab(L.tab||'standings');
+switchTab(L.tab||'now');
 if('serviceWorker' in navigator && location.protocol.indexOf('http')===0){ navigator.serviceWorker.register('sw.js').catch(()=>{}); }
 initCloud();
 </script>
