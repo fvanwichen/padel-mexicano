@@ -461,8 +461,9 @@ const CACHE_KEY = 'padelMexicano.tour', UI_KEY = 'padelMexicano.ui', OLD_KEY = '
 
 /* ---- state: T = shared tournament, L = local UI/role ---- */
 let T = null;
-let L = { tab:'now', standType:'ind', scope:'all', role:'viewer', me:null };
+let L = { tab:'now', standType:'ind', scope:'all', role:'viewer', me:null, askedWho:false };
 let overtakeSnap = {};   // per-view rank snapshot for overtake animation
+let whoPrompted = false;  // session guard for the first-run name prompt
 
 /* cloud handles */
 let cloud = false, db = null, docRef = null, docExists = false, pushTimer = null;
@@ -639,6 +640,7 @@ function render(){
   renderSchedule();
   renderPlayers();
   renderMore();
+  maybePromptWho();
 }
 function renderStatus(){
   const p=$('#statusPill');
@@ -875,12 +877,18 @@ function burstConfetti(){
     if(t-t0<2700) requestAnimationFrame(frame); else ctx.clearRect(0,0,W,H);
   })(t0);
 }
+function namesCustomized(){ return T.players.some((p,i)=> p.name && p.name!=='Player '+(i+1)); }
+function maybePromptWho(){
+  if(whoPrompted || L.askedWho || L.me) return;   // already handled this session / already chosen
+  if(!namesCustomized()) return;                  // wait until the real roster has loaded
+  whoPrompted=true; openWho();
+}
 function openWho(){
   const list=$('#whoList'); list.innerHTML='';
   T.players.forEach((p,i)=>{ const o=el('button','who-opt'+(L.me===p.id?' sel':'')); o.innerHTML=`<span class="n tnum">${i+1}</span>${esc(p.name)}`;
-    o.onclick=()=>{ L.me=p.id; saveLocal(); $('#whoBack').classList.remove('show'); render(); toast('Following '+p.name); }; list.appendChild(o); });
+    o.onclick=()=>{ L.me=p.id; L.askedWho=true; saveLocal(); $('#whoBack').classList.remove('show'); render(); toast('Following '+p.name); }; list.appendChild(o); });
   const clr=el('button','who-opt'); clr.style.justifyContent='center'; clr.style.color='var(--txt-faint)'; clr.textContent='Just watching (no one)';
-  clr.onclick=()=>{ L.me=null; saveLocal(); $('#whoBack').classList.remove('show'); render(); toast('Following no one'); }; list.appendChild(clr);
+  clr.onclick=()=>{ L.me=null; L.askedWho=true; saveLocal(); $('#whoBack').classList.remove('show'); render(); toast('Just watching'); }; list.appendChild(clr);
   $('#whoBack').classList.add('show');
 }
 
