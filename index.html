@@ -192,6 +192,8 @@ nav.tabs button.on::before{content:"";position:absolute;top:0;width:26px;height:
 .row2{display:flex;gap:10px;}.row2>*{flex:1;}
 
 /* Now screen */
+.mode-cap{font-size:11.5px;font-weight:700;color:var(--txt-faint);margin:-2px 2px 14px;display:flex;align-items:center;gap:6px;}
+.mode-cap b{color:var(--accent);font-weight:800;}
 .now-prog{display:flex;align-items:center;gap:10px;margin:2px 2px 14px;}
 .now-prog .rnum{font-size:12px;font-weight:900;color:var(--accent);letter-spacing:.06em;}
 .now-prog .bar{flex:1;height:6px;border-radius:99px;background:var(--surface-2);overflow:hidden;}
@@ -332,7 +334,12 @@ body[data-role="scorekeeper"] .need-admin{display:none !important;}
     <!-- RULES -->
     <section class="screen" id="screen-rules">
       <div class="sec-head"><h2>Rules</h2><button class="btn btn-ghost btn-sm" id="rulesBack">‹ Back</button></div>
-      <p class="rules-intro">Eight players, two courts. You get a new partner every round and never play with the same teammate twice in a day — so by the end you've partnered everyone.</p>
+      <p class="rules-intro">Eight players, two courts, fast rally scoring. The match itself is identical in both formats — the only thing that changes is how partners are chosen each round.</p>
+      <div class="lab-sec">Formats</div>
+      <div class="card rules" style="margin-bottom:18px">
+        <div class="rule"><div class="term">Americano</div><div class="desc">The classic. <b>You partner a different teammate every round</b> and never play with the same person twice in a day, so by the end you've teamed up with everyone. The whole schedule is drawn at the start.</div></div>
+        <div class="rule"><div class="term">Mexicano</div><div class="desc">More competitive. <b>Each round's pairings come from the live standings</b> — the top players are grouped on one court, the chasing pack on another, and within each court the leader is paired with the lowest so games stay even. Win and you climb into tougher company. Only round 1 is random; every round after is earned.</div></div>
+      </div>
       <div class="lab-sec">The match</div>
       <div class="card rules" style="margin-bottom:18px">
         <div class="rule"><div class="term">One rally, one point</div><div class="desc">No games, sets or 15–30–40. <b>Every rally you win is worth exactly 1 point.</b></div></div>
@@ -851,6 +858,11 @@ function followStrip(){
 function renderNow(){
   const ses=currentSession(); const body=$('#nowBody'); if(!body) return; body.innerHTML=''; $('#nowHint').textContent='';
   body.appendChild(followStrip());
+  const _mode=T.settings.mode||'americano';
+  const cap=el('div','mode-cap'); cap.innerHTML = _mode==='mexicano'
+    ? `<b>Mexicano</b> · pairings are set by the standings each round`
+    : `<b>Americano</b> · you partner someone new every round`;
+  body.appendChild(cap);
   if(!ses.rounds.length){
     if(canAdmin()){ body.appendChild(emptyState('Ready to start', T.settings.mode==='mexicano'
         ? `Generate round 1 — after that, each round is drawn from the standings.`
