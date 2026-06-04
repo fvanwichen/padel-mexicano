@@ -366,12 +366,16 @@ body[data-role="scorekeeper"] .need-admin{display:none !important;}
 
       <div class="need-admin">
         <div class="card" id="settingsCard" style="margin-bottom:18px">
+          <div class="field" style="display:block">
+            <div class="lab" style="margin-bottom:9px">Format<small id="modeSub">How each round's pairings are decided</small></div>
+            <div class="seg" id="modeSeg" style="margin-bottom:0"><button data-mode="americano">Americano</button><button data-mode="mexicano">Mexicano</button></div>
+          </div>
           <div class="field">
             <div class="lab">Points per match<small>Play to this total; more points wins</small></div>
             <div class="stepper" data-step="pointTarget"><button data-d="-1">−</button><span class="val tnum" id="ptVal">24</span><button data-d="1">+</button></div>
           </div>
           <div class="field">
-            <div class="lab">Rounds per day<small>Max 7 — everyone partners everyone once</small></div>
+            <div class="lab">Rounds per day<small id="rdSub">Max 7 — everyone partners everyone once</small></div>
             <div class="stepper" data-step="defaultRounds"><button data-d="-1">−</button><span class="val tnum" id="rdVal">6</span><button data-d="1">+</button></div>
           </div>
         </div>
@@ -472,7 +476,7 @@ function newSession(n){ return { id:'s'+Date.now()+Math.floor(Math.random()*1000
 function defaultTour(){
   return { schema:2,
     players:Array.from({length:PLAYER_COUNT},(_,i)=>({id:'p'+(i+1),name:'Player '+(i+1)})),
-    settings:{pointTarget:24, defaultRounds:6},
+    settings:{pointTarget:24, defaultRounds:6, mode:'americano'},
     sessions:[newSession(1)], currentSessionId:null };
 }
 function ensureSession(){
@@ -725,7 +729,9 @@ function renderSchedule(){
   $('#scheduleHint').textContent = total? `${done}/${total} played` : '';
   if(!ses.rounds.length){
     if(canAdmin()){
-      body.appendChild(emptyState('No schedule yet',`Generate ${T.settings.defaultRounds} rounds of randomised, no-repeat-partner matches for ${ses.name}.`));
+      body.appendChild(emptyState('No schedule yet', T.settings.mode==='mexicano'
+        ? `Mexicano: generate round 1, then every following round is drawn from the standings.`
+        : `Generate ${T.settings.defaultRounds} rounds of randomised, no-repeat-partner matches for ${ses.name}.`));
       const gen=el('button','btn btn-primary','⚡  Generate schedule'); gen.style.marginTop='4px'; gen.onclick=doGenerate; body.appendChild(gen);
     } else {
       body.appendChild(emptyState('Waiting for the draw','The organizer hasn\'t generated this day\'s matches yet. It\'ll appear here automatically.'));
@@ -738,10 +744,14 @@ function renderSchedule(){
     rnd.matches.forEach(m=>c.appendChild(matchEl(m))); body.appendChild(c);
   });
   if(canAdmin()){
-    const re=el('button','btn btn-ghost','↻  Regenerate schedule'); re.style.marginTop='6px';
+    const row=el('div','row2'); row.style.marginTop='6px';
+    const re=el('button','btn btn-ghost','↻  Regenerate');
     re.onclick=()=>{ const played=ses.rounds.some(r=>r.matches.some(m=>m.done));
       played ? confirmModal('Regenerate?','This clears all results entered for '+ses.name+' and builds a fresh draw.',doGenerate) : doGenerate(); };
-    body.appendChild(re);
+    const clr=el('button','btn btn-ghost','✕  Clear');
+    clr.onclick=()=>{ const played=ses.rounds.some(r=>r.matches.some(m=>m.done));
+      played ? confirmModal('Clear schedule?','This removes the draw and all results for '+ses.name+', returning to the Generate screen.',doClearSchedule) : doClearSchedule(); };
+    row.append(re,clr); body.appendChild(row);
   }
 }
 function matchEl(m){
@@ -777,7 +787,7 @@ function matchEl(m){
     if(canScore()){ const edit=el('button','btn btn-ghost btn-sm','Edit'); edit.onclick=()=>{m.done=false;commit();render();}; foot.appendChild(edit); }
   } else if(canScore()){
     const sv=el('button','btn btn-primary btn-sm','Save result'); sv.style.flex='1';
-    sv.onclick=()=>{ haptic('save'); if(m.scoreA==null)m.scoreA=0; if(m.scoreB==null)m.scoreB=0; m.done=true; commit(); render(); toast('Result saved'); };
+    sv.onclick=()=>{ haptic('save'); if(m.scoreA==null)m.scoreA=0; if(m.scoreB==null)m.scoreB=0; m.done=true; ensureNextMexicanoRound(); commit(); render(); toast('Result saved'); };
     foot.appendChild(sv);
   } else {
     foot.appendChild(el('span','tag-pending','Not played yet'));
@@ -802,8 +812,32 @@ function teamLine(m,side,win,loss,editable){
   line.appendChild(box);
   return line;
 }
-function doGenerate(){ const ses=currentSession(); ses.rounds=generateSchedule(Math.min(T.settings.defaultRounds,MAX_ROUNDS));
-  commit(); render(); toast('Schedule ready · '+ses.rounds.length+' rounds'); }
+function doGenerate(){ const ses=currentSession();
+  if(T.settings.mode==='mexicano'){ ses.rounds=[ randomRound(0) ]; commit(); render(); toast('Round 1 ready'); }
+  else { ses.rounds=generateSchedule(Math.min(T.settings.defaultRounds,MAX_ROUNDS)); commit(); render(); toast('Schedule ready · '+ses.rounds.length+' rounds'); }
+}
+function doClearSchedule(){ const ses=currentSession(); ses.rounds=[]; commit(); render(); toast('Schedule cleared'); }
+
+/* ---- Mexicano: dynamic, standings-driven rounds ---- */
+function randomRound(r){
+  const ids=shuffle(T.players.map(p=>p.id)), matches=[];
+  for(let c=0;c<PLAYER_COUNT/4;c++){ const g=ids.slice(c*4,c*4+4);
+    matches.push({id:'m'+r+'_'+c,court:c+1,teamA:[g[0],g[1]],teamB:[g[2],g[3]],scoreA:null,scoreB:null,done:false}); }
+  return { n:r+1, matches };
+}
+function mexicanoRound(r){
+  const {ind}=computeStandings('session');
+  const ranked=rankSort(T.players.map(p=>({id:p.id,...ind[p.id]}))).map(x=>x.id), matches=[];
+  for(let c=0;c<PLAYER_COUNT/4;c++){ const g=ranked.slice(c*4,c*4+4);   // top-4 on court 1, etc.
+    matches.push({id:'m'+r+'_'+c,court:c+1,teamA:[g[0],g[3]],teamB:[g[1],g[2]],scoreA:null,scoreB:null,done:false}); }
+  return { n:r+1, matches };                                            // pair 1&4 vs 2&3 for balance
+}
+function ensureNextMexicanoRound(){
+  if(T.settings.mode!=='mexicano') return;
+  const ses=currentSession(); if(!ses.rounds.length) return;
+  const target=Math.max(1,T.settings.defaultRounds), last=ses.rounds[ses.rounds.length-1];
+  if(last.matches.every(m=>m.done) && ses.rounds.length<target) ses.rounds.push(mexicanoRound(ses.rounds.length));
+}
 
 /* ---- Now screen + you-lens + winner reveal ---- */
 let lastCompleteId=null;
@@ -818,7 +852,9 @@ function renderNow(){
   const ses=currentSession(); const body=$('#nowBody'); if(!body) return; body.innerHTML=''; $('#nowHint').textContent='';
   body.appendChild(followStrip());
   if(!ses.rounds.length){
-    if(canAdmin()){ body.appendChild(emptyState('Ready to start',`Generate ${T.settings.defaultRounds} rounds and the first matches show up right here.`));
+    if(canAdmin()){ body.appendChild(emptyState('Ready to start', T.settings.mode==='mexicano'
+        ? `Generate round 1 — after that, each round is drawn from the standings.`
+        : `Generate ${T.settings.defaultRounds} rounds and the first matches show up right here.`));
       const gen=el('button','btn btn-primary','⚡  Generate schedule'); gen.onclick=doGenerate; body.appendChild(gen); }
     else body.appendChild(emptyState('Waiting to start','The organizer will set the draw — your first match appears here automatically.'));
     return;
@@ -845,6 +881,11 @@ function renderNow(){
       row.innerHTML=`<span class="cc">Court ${m.court}</span><span>${esc(playerName(m.teamA[0]))} &amp; ${esc(playerName(m.teamA[1]))} <span style="color:var(--txt-faint)">v</span> ${esc(playerName(m.teamB[0]))} &amp; ${esc(playerName(m.teamB[1]))}</span>`;
       card.appendChild(row); });
     body.appendChild(card);
+  } else if(T.settings.mode==='mexicano' && ses.rounds.length < Math.max(1,T.settings.defaultRounds)){
+    body.appendChild(el('div','lab-sec','Up next'));
+    const note=el('div','card'); note.style.padding='14px';
+    note.innerHTML='<div style="font-size:13px;color:var(--txt-dim);font-weight:600;line-height:1.5">The next round is drawn from the standings once this one finishes — win to climb into the top group.</div>';
+    body.appendChild(note);
   }
 }
 function renderWinner(body,ses){
@@ -909,6 +950,10 @@ function renderPlayers(){
 function renderMore(){
   $('#ptVal').textContent=T.settings.pointTarget;
   $('#rdVal').textContent=T.settings.defaultRounds;
+  const mode=T.settings.mode||'americano';
+  document.querySelectorAll('#modeSeg button').forEach(b=>b.classList.toggle('on',b.dataset.mode===mode));
+  const ms=$('#modeSub'); if(ms) ms.textContent = mode==='mexicano' ? 'Pairings set by the live standings each round' : 'Fixed draw — everyone partners everyone';
+  const rs=$('#rdSub'); if(rs) rs.textContent = mode==='mexicano' ? 'How many rounds to play' : 'Max 7 — everyone partners everyone once';
   renderAccess();
   const me=$('#meField');
   if(me){ me.innerHTML=`<div class="lab">You are<small>${L.me?'Following your matches &amp; ranking':'Tap to follow yourself'}</small></div>`;
@@ -978,6 +1023,13 @@ function switchTab(tab){ L.tab=tab; saveLocal();
 document.querySelectorAll('nav.tabs button').forEach(b=>b.onclick=()=>switchTab(b.dataset.tab));
 document.querySelectorAll('#standType button').forEach(b=>b.onclick=()=>{L.standType=b.dataset.st;saveLocal();renderStandings();});
 document.querySelectorAll('#scopeRow button').forEach(b=>b.onclick=()=>{L.scope=b.dataset.scope;saveLocal();renderStandings();});
+document.querySelectorAll('#modeSeg button').forEach(b=>b.onclick=()=>{ if(!canAdmin())return;
+  const mode=b.dataset.mode; if(mode===(T.settings.mode||'americano')) return;
+  const ses=currentSession(), played=ses.rounds.some(r=>r.matches.some(m=>m.done));
+  const apply=()=>{ T.settings.mode=mode; ses.rounds=[]; commit(); render(); toast(mode==='mexicano'?'Mexicano mode':'Americano mode'); };
+  if(played) confirmModal('Switch to '+(mode==='mexicano'?'Mexicano':'Americano')+'?','This clears the current draw and its results so you can start fresh in the new format.',apply);
+  else apply();
+});
 document.querySelectorAll('.stepper').forEach(st=>{ const key=st.dataset.step;
   st.querySelectorAll('button').forEach(btn=>btn.onclick=()=>{ if(!canAdmin())return; const d=+btn.dataset.d; let v=T.settings[key]+d;
     if(key==='pointTarget') v=Math.max(8,Math.min(48,v)); if(key==='defaultRounds') v=Math.max(1,Math.min(MAX_ROUNDS,v));
