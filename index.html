@@ -47,6 +47,7 @@ header.top{flex:none;z-index:30;padding:calc(env(safe-area-inset-top) + 16px) 20
 .brand{display:flex;align-items:center;gap:11px;}
 .brand .mark{width:34px;height:34px;border-radius:10px;flex:none;background:var(--accent);color:var(--accent-ink);
   display:grid;place-items:center;font-weight:900;font-size:19px;box-shadow:0 0 0 1px rgba(198,255,61,.4),0 6px 18px rgba(198,255,61,.22);}
+.brand .mark img{width:23px;height:23px;display:block;}
 .brand h1{font-size:18px;font-weight:800;letter-spacing:-.02em;line-height:1;}
 .brand .sub{font-size:11.5px;color:var(--txt-faint);font-weight:600;letter-spacing:.04em;text-transform:uppercase;margin-top:3px;}
 .brand .right{margin-left:auto;text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:5px;}
@@ -284,7 +285,7 @@ body[data-role="scorekeeper"] .need-admin{display:none !important;}
 <div id="app">
   <header class="top">
     <div class="brand">
-      <div class="mark">P</div>
+      <div class="mark"><img class="markimg" alt="Padel Mexicano" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHgAAAB4CAYAAAA5ZDbSAAAC/UlEQVR42u2dS27DMAxEI8LbAFn0/ifsokAPkG6DIgkcfTmj91YFGscmh6QpWVYuFwAAAAAAAAAAAAAAAAAAAADIRVl58uvt6/7u/78/30XBiZntKJkcoSa0gj0lsyMyiq1mS1FxRgaRFe0pas5YIbSyLUXRGTNFVrcnlJ0x+pwO9hRlZ4yM/NX29LKpODiit8hONoWLI1xp9XE4idvjmtzsCrfMbbk2R7viAtaEU5S3XKOrXeHmhJprdbXrI4HpmDVFjt0d4R64QfZ6Z3EgrrfIsbMTdghee4HfzeWqrPlqobiW5xrxVO19Z2s4ZmxtZjpmdHGJ5lfi1C5pdbE/XLL2mUBnx8HPPueSzZZNlutc9JYC/8+0no8LHbI4ENdbZJsS3bPEOpXrY4fxbc9zqokfZK93FrNkx5xDNVtnl2rVjI5M97odSv/sviQQwRu7iQ71jn2qwJRp/QA/yFbvsXBkdiq0ayN1D37MnMe/RwShS2AfZ43NUpbcdhEYHYDhEtEtS3VGfE+WXkR6mDQjs9TH2TEqclaJ3HKNI54vr+4NiktUv1qXNfrY7MPE0itzsjvgk0x3EbdJYDdHuNoUK50J43287UZo19vXPXOZ7pU8FrvDnXFGzeL2zPYsGQevmCRwelw4wn+yO7XWlOSW78hky7IMpgnL56NjpgGOG5dmP/cyI3uL/WnDNLvBWhVQKUroaGeevf+6iJpO4N6ir3hokLXfkGqCah4ejBBXqXmU7nLPlN4eAiuPBqyHMW6/tIbAjeJutcvOTuI6T8gE4nrPtsWu4j6b2Hd8kW3LF8DfTXK4icwmLE+OdRK57CbuJ5Mg7JNlLK5LJseO4s4q/Qi8UNwsqzkQeEDHvMsYWFbglldSakW220ZpB3F3EDkcxXW/Brtx8Kz5Zcd57EDc+mMVsjkQ11tkm2FSz3LpNHyKXUQbde7swRAOmbnKyQqZLr9sdrST1X9TSeoenMGxvFA3KZNndq+zzwcAAAAAAAAAAAAAAAAAAAAAALL8AeB5NvLFQzJ8AAAAAElFTkSuQmCC"></div>
       <div>
         <h1>Padel Mexicano</h1>
         <div class="sub">Tournament tracker</div>
@@ -385,6 +386,10 @@ body[data-role="scorekeeper"] .need-admin{display:none !important;}
             <div class="lab">Rounds per day<small id="rdSub">Max 7 — everyone partners everyone once</small></div>
             <div class="stepper" data-step="defaultRounds"><button data-d="-1">−</button><span class="val tnum" id="rdVal">6</span><button data-d="1">+</button></div>
           </div>
+          <div class="field" style="border-bottom:none">
+            <div class="lab">Wooden Spoon<small>Cheeky last-place callout on the shared recap</small></div>
+            <button class="btn btn-ghost btn-sm" id="spoonBtn" style="min-width:64px">On</button>
+          </div>
         </div>
 
         <div class="lab-sec">Days</div>
@@ -483,7 +488,7 @@ function newSession(n){ return { id:'s'+Date.now()+Math.floor(Math.random()*1000
 function defaultTour(){
   return { schema:2,
     players:Array.from({length:PLAYER_COUNT},(_,i)=>({id:'p'+(i+1),name:'Player '+(i+1)})),
-    settings:{pointTarget:24, defaultRounds:6, mode:'americano'},
+    settings:{pointTarget:24, defaultRounds:6, mode:'americano', recapSpoon:true},
     sessions:[newSession(1)], currentSessionId:null };
 }
 function ensureSession(){
@@ -627,6 +632,7 @@ function sparkline(vals,max){
 const $ = s=>document.querySelector(s);
 const el=(t,c,h)=>{const e=document.createElement(t); if(c)e.className=c; if(h!=null)e.innerHTML=h; return e;};
 function esc(s){ return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+const COURT_ICON='<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"><rect x="3" y="6.5" width="18" height="11" rx="1.4"/><line x1="12" y1="6.5" x2="12" y2="17.5"/><line x1="7" y1="6.5" x2="7" y2="17.5"/><line x1="17" y1="6.5" x2="17" y2="17.5"/><line x1="7" y1="12" x2="17" y2="12"/></svg>';
 
 /* ---- haptics: real on Android (Vibration API); best-effort on iOS via a hidden switch ---- */
 let _hapticEl=null;
@@ -880,7 +886,7 @@ function renderNow(){
   if(L.me){
     const mine=rnd.matches.find(m=>m.teamA.includes(L.me)||m.teamB.includes(L.me));
     if(mine){ const onA=mine.teamA.includes(L.me), partner=(onA?mine.teamA:mine.teamB).find(x=>x!==L.me), opp=onA?mine.teamB:mine.teamA;
-      const b=el('div','you-banner'); b.innerHTML=`<div class="ic">▸</div><div class="t">You're on <b>Court ${mine.court}</b> with ${esc(playerName(partner))}<br>vs ${esc(playerName(opp[0]))} &amp; ${esc(playerName(opp[1]))}</div>`; body.appendChild(b);
+      const b=el('div','you-banner'); b.innerHTML=`<div class="ic">${COURT_ICON}</div><div class="t">You're on <b>Court ${mine.court}</b> with ${esc(playerName(partner))}<br>vs ${esc(playerName(opp[0]))} &amp; ${esc(playerName(opp[1]))}</div>`; body.appendChild(b);
     } else { const b=el('div','you-banner rest'); b.innerHTML=`<div class="ic">●</div><div class="t">You're resting this round.</div>`; body.appendChild(b); }
   }
   const c=el('div','card round-card'); c.appendChild(el('div','round-head',`<span class="rn">ROUND ${rnd.n} · NOW</span><span class="meta">${total} courts</span>`));
@@ -915,10 +921,154 @@ function renderWinner(body,ses){
   wrap.appendChild(pod);
   if(trows.length){ const bd=trows[0]; const rs=el('div','reveal-stat'); rs.innerHTML=`<div class="rs"><div class="k">Best duo of the day</div><div class="v">${esc(bd.name)} · ${bd.pts} pts</div></div>`; wrap.appendChild(rs); }
   body.appendChild(wrap);
-  const vb=el('button','btn btn-ghost','View full standings'); vb.onclick=()=>switchTab('standings'); body.appendChild(vb);
-  if(canAdmin()){ const nd=el('button','btn btn-primary','Start a new day'); nd.style.marginTop='10px';
+  const sh=el('button','btn btn-primary','Share recap'); sh.onclick=()=>shareRecap(sh); body.appendChild(sh);
+  const vb=el('button','btn btn-ghost','View full standings'); vb.style.marginTop='10px'; vb.onclick=()=>switchTab('standings'); body.appendChild(vb);
+  if(canAdmin()){ const nd=el('button','btn btn-ghost','Start a new day'); nd.style.marginTop='10px';
     nd.onclick=()=>{ const n=T.sessions.length+1, s=newSession(n); T.sessions.push(s); T.currentSessionId=s.id; commit(); render(); toast('Started '+s.name); }; body.appendChild(nd); }
   if(lastCompleteId!==ses.id){ lastCompleteId=ses.id; haptic('win'); setTimeout(burstConfetti,250); }
+}
+
+/* ===================== Shareable Night Recap ===================== */
+/*RECAP_DRAW_START*/
+function recapLayout(R){
+  const W=1080, M=72;
+  const champTop=178, champH=228, champBottom=champTop+champH;
+  const stLabelY=champBottom+40, stTop=stLabelY+34;
+  const rowH=62, nrows=R.rows.length, stPanelH=Math.max(rowH,nrows*rowH)+28, stBottom=stTop+stPanelH;
+  const awLabelY=stBottom+34, awTop=awLabelY+34;
+  const na=R.awards.length, arows=Math.max(1,Math.ceil(na/2)), cardH=148, gap=24;
+  const awBottom = na ? awTop + arows*cardH + (arows-1)*gap : stBottom;
+  const footY = awBottom + 54, H = footY + 40;
+  return {W,M,champTop,champH,champBottom,stLabelY,stTop,rowH,nrows,stPanelH,stBottom,awLabelY,awTop,na,arows,cardH,gap,awBottom,footY,H};
+}
+function _rr(ctx,x,y,w,h,r){ if(ctx.roundRect){ctx.beginPath();ctx.roundRect(x,y,w,h,r);return;}
+  ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath(); }
+function _trk(ctx,s,x,y,track){ let w=0; for(const c of s){ ctx.fillText(c,x+w,y); w+=ctx.measureText(c).width+track; } return w-track; }
+function _fit(ctx,text,maxW,weight,start,fam,minS){ minS=minS||14; let s=start; ctx.font=weight+' '+s+'px '+fam;
+  while(ctx.measureText(text).width>maxW && s>minS){ s--; ctx.font=weight+' '+s+'px '+fam; }
+  let t=text; if(ctx.measureText(t).width>maxW){ while(t.length>1 && ctx.measureText(t+'…').width>maxW) t=t.slice(0,-1); t+='…'; }
+  return {size:s,text:t}; }
+function drawCrown(ctx,x,y,w,h,col){ const base=y+h, band=0.18*h;
+  ctx.save(); ctx.shadowColor='rgba(255,210,74,0.45)'; ctx.shadowBlur=14; ctx.fillStyle=col;
+  ctx.beginPath(); ctx.moveTo(x,base-band); ctx.lineTo(x,y+0.46*h); ctx.lineTo(x+0.24*w,y+0.62*h); ctx.lineTo(x+0.5*w,y+0.08*h);
+  ctx.lineTo(x+0.76*w,y+0.62*h); ctx.lineTo(x+w,y+0.46*h); ctx.lineTo(x+w,base-band); ctx.closePath(); ctx.fill();
+  _rr(ctx,x,base-band,w,band,4); ctx.fill(); ctx.restore();
+  ctx.fillStyle=col; [[x,y+0.46*h],[x+0.5*w,y+0.08*h],[x+w,y+0.46*h]].forEach(p=>{ ctx.beginPath(); ctx.arc(p[0],p[1],5.5,0,7); ctx.fill(); }); }
+function drawRecap(ctx,R,opt){
+  const C=opt.C, fam=opt.font||'Archivo', logo=opt.logo, L=recapLayout(R), W=L.W, M=L.M, H=L.H;
+  ctx.fillStyle=C.bg; ctx.fillRect(0,0,W,H);
+  const g=ctx.createRadialGradient(W/2,150,40,W/2,150,640); g.addColorStop(0,'rgba(198,255,61,0.10)'); g.addColorStop(1,'rgba(198,255,61,0)');
+  ctx.fillStyle=g; ctx.fillRect(0,0,W,520);
+  if(logo){ ctx.save(); ctx.globalAlpha=0.05; ctx.drawImage(logo, W-470, H-470, 540,540); ctx.restore(); }
+  ctx.textBaseline='alphabetic'; ctx.textAlign='left';
+  if(logo) ctx.drawImage(logo, M, 48, 94,94);
+  ctx.fillStyle=C.txt; ctx.font='800 39px '+fam; ctx.fillText(R.title, M+114, 92);
+  ctx.fillStyle=C.lime; ctx.font='700 19px '+fam; _trk(ctx, R.sub, M+116, 122, 1.5);
+  // champion
+  ctx.fillStyle=C.panel; _rr(ctx,M,L.champTop,W-2*M,L.champH,28); ctx.fill();
+  ctx.strokeStyle='rgba(198,255,61,0.18)'; ctx.lineWidth=1; ctx.stroke();
+  ctx.fillStyle=C.lime; ctx.font='800 20px '+fam; _trk(ctx,'CHAMPION OF THE NIGHT', M+40, L.champTop+44, 2);
+  const nf=_fit(ctx, R.champ.name, W-2*M-80-150, '800', 80, fam, 40);
+  ctx.save(); ctx.shadowColor='rgba(198,255,61,0.45)'; ctx.shadowBlur=22; ctx.fillStyle=C.txt; ctx.font='800 '+nf.size+'px '+fam;
+  ctx.fillText(nf.text, M+38, L.champTop+58+nf.size*0.78); ctx.restore();
+  ctx.fillStyle=C.dim; ctx.font='600 25px '+fam; ctx.fillText(R.champ.sub, M+40, L.champTop+196);
+  drawCrown(ctx, W-M-30-84, (L.champTop+L.champBottom)/2-31, 84,62, C.gold);
+  // standings
+  ctx.fillStyle=C.lime; ctx.font='800 20px '+fam; _trk(ctx,'FINAL STANDINGS', M+2, L.stLabelY, 2);
+  ctx.fillStyle=C.panel2; _rr(ctx,M,L.stTop,W-2*M,L.stPanelH,24); ctx.fill();
+  const top=L.stTop+14;
+  R.rows.forEach((r,i)=>{ const ty=top+i*L.rowH, cy=ty+L.rowH/2;
+    if(i===0){ ctx.fillStyle='rgba(198,255,61,0.07)'; _rr(ctx,M+8,ty+3,W-2*M-16,L.rowH-6,12); ctx.fill(); }
+    else { ctx.strokeStyle=C.line; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(M+20,ty+1); ctx.lineTo(W-M-20,ty+1); ctx.stroke(); }
+    const cxr=M+48, mc=[C.gold,C.silver,C.bronze][i]||'#2e3440';
+    ctx.fillStyle=mc; ctx.beginPath(); ctx.arc(cxr,cy,17,0,7); ctx.fill();
+    ctx.fillStyle=(i<3?C.ink:C.dim); ctx.font='800 20px '+fam; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(String(r.rank), cxr, cy+1);
+    ctx.textAlign='left';
+    const nm=_fit(ctx, r.name, W-2*M-300, '700', 31, fam, 18);
+    ctx.fillStyle=C.txt; ctx.font='700 '+nm.size+'px '+fam; ctx.fillText(nm.text, M+88, cy-9);
+    ctx.fillStyle=C.faint; ctx.font='600 17px '+fam; ctx.fillText(r.wdl, M+90, cy+18);
+    ctx.fillStyle=C.lime; ctx.font='800 39px '+fam; ctx.textAlign='right'; ctx.fillText(String(r.pts), W-M-46, cy);
+    ctx.textAlign='left'; ctx.textBaseline='alphabetic';
+  });
+  // awards
+  if(L.na){
+    ctx.fillStyle=C.lime; ctx.font='800 20px '+fam; _trk(ctx,'AWARDS OF THE NIGHT', M+2, L.awLabelY, 2);
+    const fullW=W-2*M, cw=(fullW-L.gap)/2;
+    R.awards.forEach((a,i)=>{ const col=i%2, rowi=Math.floor(i/2), last=(i===L.na-1)&&(L.na%2===1);
+      const w=last?fullW:cw, cx=last?M:M+col*(cw+L.gap), ay=L.awTop+rowi*(L.cardH+L.gap);
+      ctx.fillStyle=C.panel; _rr(ctx,cx,ay,w,L.cardH,18); ctx.fill();
+      ctx.fillStyle=C.lime; _rr(ctx,cx,ay+18,5,L.cardH-36,3); ctx.fill();
+      ctx.fillStyle=C.lime; ctx.font='800 17px '+fam; _trk(ctx,a.label,cx+26,ay+40,1.2);
+      const vf=_fit(ctx,a.value,w-52,'700',29,fam,16); ctx.fillStyle=C.txt; ctx.font='700 '+vf.size+'px '+fam; ctx.fillText(vf.text, cx+26, ay+82);
+      const sf=_fit(ctx,a.sub,w-52,'500',18,fam,12); ctx.fillStyle=C.dim; ctx.font='500 '+sf.size+'px '+fam; ctx.fillText(sf.text, cx+27, ay+118);
+    });
+  }
+  // footer
+  if(logo) ctx.drawImage(logo, M, L.footY-22, 30,30);
+  ctx.fillStyle=C.faint; ctx.font='600 18px '+fam; ctx.textBaseline='middle'; ctx.fillText('made with Padel Mexicano', M+40, L.footY-7); ctx.textBaseline='alphabetic';
+}
+/*RECAP_DRAW_END*/
+
+function computeRecap(){
+  const ses=currentSession();
+  const {ind,team}=computeStandings('session');
+  const irows=rankSort(T.players.map(p=>({id:p.id,name:p.name,...ind[p.id]}))).filter(r=>r.played>0);
+  const rows=irows.map((r,i)=>({rank:i+1,name:r.name,wdl:r.w+'W '+r.d+'D '+r.l+'L',pts:r.pts}));
+  const champ = irows.length ? {name:irows[0].name, sub:irows[0].pts+' pts   ·   '+irows[0].w+'W  '+irows[0].d+'D  '+irows[0].l+'L'} : {name:'—',sub:''};
+  const d=new Date(), DOW=['SUN','MON','TUE','WED','THU','FRI','SAT'], MON=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+  const sub=(T.settings.mode==='mexicano'?'MEXICANO':'AMERICANO')+' NIGHT   ·   '+DOW[d.getDay()]+' '+d.getDate()+' '+MON[d.getMonth()];
+  const awards=[];
+  const trows=rankSort(Object.values(team));
+  if(trows.length){ const b=trows[0]; awards.push({label:'BEST DUO', value:playerName(b.a)+' & '+playerName(b.b), sub:b.pts+' pts won together'}); }
+  const compRounds=ses.rounds.filter(r=>r.matches.some(m=>m.done)).length;
+  if(compRounds>=2){
+    const r1=computeStandings('session',(m,s,r)=>r.n===1).ind;
+    const r1order=rankSort(T.players.map(p=>({id:p.id,...r1[p.id]}))).map(x=>x.id);
+    const r1rank={}; r1order.forEach((id,i)=>r1rank[id]=i);
+    const fin={}; irows.forEach((r,i)=>fin[r.id]=i);
+    let best=null; irows.forEach(r=>{ const base=(r1rank[r.id]!=null?r1rank[r.id]:fin[r.id]); const climb=base-fin[r.id]; if(climb>0 && (!best||climb>best.climb)) best={name:r.name,climb}; });
+    if(best) awards.push({label:'BIGGEST MOVER', value:best.name, sub:'climbed '+best.climb+(best.climb===1?' place':' places')});
+  }
+  const ordered=ses.rounds.slice().sort((a,b)=>a.n-b.n), cur={}, bst={};
+  T.players.forEach(p=>{cur[p.id]=0;bst[p.id]=0;});
+  ordered.forEach(r=>{ const won=new Set(), played=new Set();
+    r.matches.forEach(m=>{ if(!m.done)return; m.teamA.concat(m.teamB).forEach(x=>played.add(x));
+      if(m.scoreA>m.scoreB) m.teamA.forEach(x=>won.add(x)); else if(m.scoreB>m.scoreA) m.teamB.forEach(x=>won.add(x)); });
+    played.forEach(id=>{ if(won.has(id)){ cur[id]++; if(cur[id]>bst[id])bst[id]=cur[id]; } else cur[id]=0; }); });
+  let hh=null; T.players.forEach(p=>{ if(bst[p.id]>(hh?hh.s:0)) hh={name:playerName(p.id),s:bst[p.id]}; });
+  if(hh && hh.s>=2) awards.push({label:'HOT HAND', value:hh.name, sub:hh.s+' wins in a row'});
+  else { const mw=irows.slice().sort((a,b)=>b.w-a.w)[0]; if(mw&&mw.w>0) awards.push({label:'MOST WINS', value:mw.name, sub:mw.w+(mw.w===1?' win':' wins')}); }
+  if(T.settings.recapSpoon!==false && irows.length>=4) awards.push({label:'WOODEN SPOON', value:irows[irows.length-1].name, sub:'better luck next time'});
+  return {title:'Padel Mexicano', sub, champ, rows, awards:awards.slice(0,4)};
+}
+let _recapLogo=null;
+function recapLogo(){ if(_recapLogo) return Promise.resolve(_recapLogo);
+  return new Promise(res=>{ const im=new Image(); im.crossOrigin='anonymous';
+    im.onload=()=>{ try{ const oc=document.createElement('canvas'); oc.width=im.width; oc.height=im.height; const o=oc.getContext('2d');
+        o.drawImage(im,0,0); const d=o.getImageData(0,0,oc.width,oc.height), a=d.data;
+        for(let i=0;i<a.length;i+=4){ a[i+3]=Math.max(0,Math.min(255,(a[i+1]-a[i+2])*3)); }
+        o.putImageData(d,0,0); _recapLogo=oc; res(oc);
+      }catch(e){ _recapLogo=im; res(im); } };
+    im.onerror=()=>res(null); im.src='icon-512.png'; }); }
+async function buildRecapCanvas(){
+  const R=computeRecap(), L=recapLayout(R);
+  if(document.fonts&&document.fonts.load){ try{ await Promise.all(['800 80px Archivo','700 31px Archivo','600 18px Archivo','800 20px Archivo'].map(f=>document.fonts.load(f))); await document.fonts.ready; }catch(e){} }
+  const logo=await recapLogo();
+  const cv=document.createElement('canvas'); cv.width=L.W; cv.height=L.H; const ctx=cv.getContext('2d'); if(!ctx) throw new Error('no2d');
+  const C={bg:'#0d1014',panel:'#171b22',panel2:'#13171d',line:'#2c323b',lime:'#c6ff3d',txt:'#eef3f8',dim:'#97a1ad',faint:'#66707c',gold:'#ffd24a',silver:'#cbd3dd',bronze:'#ce8e54',ink:'#0d1014'};
+  drawRecap(ctx,R,{C,font:'Archivo',logo}); return cv;
+}
+async function shareRecap(btn){
+  const orig=btn?btn.textContent:'';
+  try{ if(btn){ btn.disabled=true; btn.textContent='Preparing…'; }
+    const cv=await buildRecapCanvas();
+    const blob=await new Promise(r=>cv.toBlob(r,'image/png',0.95));
+    const file=new File([blob],'padel-recap.png',{type:'image/png'});
+    const data={files:[file],title:'Padel night recap'};
+    if(navigator.canShare && navigator.canShare(data)){ await navigator.share(data); }
+    else { const url=URL.createObjectURL(blob); window.open(url,'_blank'); toast('Recap opened — long-press to save'); setTimeout(()=>URL.revokeObjectURL(url),60000); }
+  }catch(e){ if(e&&e.name!=='AbortError') toast('Couldn’t create recap'); }
+  finally{ if(btn){ btn.disabled=false; btn.textContent=orig||'Share recap'; } }
 }
 function burstConfetti(){
   const c=$('#confetti'); if(!c||!c.getContext) return; const ctx=c.getContext('2d');
@@ -966,6 +1116,7 @@ function renderMore(){
   document.querySelectorAll('#modeSeg button').forEach(b=>b.classList.toggle('on',b.dataset.mode===mode));
   const ms=$('#modeSub'); if(ms) ms.textContent = mode==='mexicano' ? 'Pairings set by the live standings each round' : 'Fixed draw — everyone partners everyone';
   const rs=$('#rdSub'); if(rs) rs.textContent = mode==='mexicano' ? 'How many rounds to play' : 'Max 7 — everyone partners everyone once';
+  const sb=$('#spoonBtn'); if(sb) sb.textContent = (T.settings.recapSpoon!==false) ? 'On' : 'Off';
   renderAccess();
   const me=$('#meField');
   if(me){ me.innerHTML=`<div class="lab">You are<small>${L.me?'Following your matches &amp; ranking':'Tap to follow yourself'}</small></div>`;
@@ -1042,6 +1193,7 @@ document.querySelectorAll('#modeSeg button').forEach(b=>b.onclick=()=>{ if(!canA
   if(played) confirmModal('Switch to '+(mode==='mexicano'?'Mexicano':'Americano')+'?','This clears the current draw and its results so you can start fresh in the new format.',apply);
   else apply();
 });
+{ const sb=$('#spoonBtn'); if(sb) sb.onclick=()=>{ if(!canAdmin())return; T.settings.recapSpoon = (T.settings.recapSpoon===false); commit(); renderMore(); }; }
 document.querySelectorAll('.stepper').forEach(st=>{ const key=st.dataset.step;
   st.querySelectorAll('button').forEach(btn=>btn.onclick=()=>{ if(!canAdmin())return; const d=+btn.dataset.d; let v=T.settings[key]+d;
     if(key==='pointTarget') v=Math.max(8,Math.min(48,v)); if(key==='defaultRounds') v=Math.max(1,Math.min(MAX_ROUNDS,v));
