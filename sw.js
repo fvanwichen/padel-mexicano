@@ -1,5 +1,5 @@
-/* Padel Mexicano — service worker (app-shell cache only) */
-const CACHE = 'padel-mexicano-v1';
+/* Padelito — service worker (app-shell cache only) */
+const CACHE = 'padelito-v2';
 const ASSETS = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {

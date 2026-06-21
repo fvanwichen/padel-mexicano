@@ -1,6 +1,6 @@
 {
-  "name": "Padel Mexicano",
-  "short_name": "Mexicano",
+  "name": "Padelito",
+  "short_name": "Padelito",
   "description": "Padel tournament tracker — schedule, scoring and live standings.",
   "start_url": "./",
   "scope": "./",
