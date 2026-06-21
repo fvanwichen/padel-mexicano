@@ -2599,6 +2599,17 @@ body[data-role="scorekeeper"] .need-admin{display:none !important;}
 .qr-wrap{background:#fff;border-radius:16px;padding:14px;display:inline-block;margin:0 auto 14px;}
 .qr-wrap canvas{display:block;width:200px;height:200px;image-rendering:pixelated;}
 .invite-code{font-size:30px;font-weight:800;letter-spacing:.18em;color:var(--accent);margin-bottom:14px;}
+.lobby-count{display:flex;align-items:center;justify-content:space-between;padding:2px 2px;}
+.lobby-count .lc-lab{font-weight:600;color:var(--txt);display:flex;flex-direction:column;}
+.lobby-count .lc-lab small{color:var(--txt-faint,#66707c);font-weight:500;font-size:12px;margin-top:2px;}
+.court-line{color:var(--txt-faint,#66707c);font-size:12.5px;margin:-2px 2px 10px;letter-spacing:.01em;}
+.resting-line{background:var(--surface);border-radius:10px;padding:9px 12px;color:var(--txt-dim,#97a1ad);font-size:13px;margin-bottom:10px;}
+.resting-line b{color:var(--txt);font-weight:700;}
+.setup-modal{max-height:90vh;overflow:auto;}
+.setup-h{font-size:18px;font-weight:800;margin:2px 2px 14px;}
+.setup-summary{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;text-align:center;color:var(--txt-dim,#97a1ad);font-size:14px;margin-bottom:14px;}
+.setup-summary b{color:var(--accent);font-weight:800;}
+.court-line.tap{cursor:pointer;}
 </style>
 </head>
 <body>
@@ -2649,13 +2660,13 @@ body[data-role="scorekeeper"] .need-admin{display:none !important;}
     <section class="screen" id="screen-players">
       <div class="sec-head"><h2>Players</h2><span class="hint" id="playersHint"></span></div>
       <div class="card" id="playerList"></div>
-      <p class="note">Eight players, two courts. Renaming updates every past result automatically.</p>
+      <p class="note">Renaming updates every past result automatically.</p>
     </section>
 
     <!-- RULES -->
     <section class="screen" id="screen-rules">
       <div class="sec-head"><h2>Rules</h2><button class="btn btn-ghost btn-sm" id="rulesBack">‹ Back</button></div>
-      <p class="rules-intro">Eight players, two courts, fast rally scoring. The match itself is identical in both formats — the only thing that changes is how partners are chosen each round.</p>
+      <p class="rules-intro">Fast rally scoring, doubles on every court. The match itself is identical in both formats — the only thing that changes is how partners are chosen each round.</p>
       <div class="lab-sec">Formats</div>
       <div class="card rules" style="margin-bottom:18px">
         <div class="rule"><div class="term">Americano</div><div class="desc">The classic. <b>You partner a different teammate every round</b> and never play with the same person twice in a day, so by the end you've teamed up with everyone. The whole schedule is drawn at the start.</div></div>
@@ -2702,18 +2713,7 @@ body[data-role="scorekeeper"] .need-admin{display:none !important;}
 
       <div class="need-admin">
         <div class="card" id="settingsCard" style="margin-bottom:18px">
-          <div class="field" style="display:block">
-            <div class="lab" style="margin-bottom:9px">Format<small id="modeSub">How each round's pairings are decided</small></div>
-            <div class="seg" id="modeSeg" style="margin-bottom:0"><button data-mode="americano">Americano</button><button data-mode="mexicano">Mexicano</button></div>
-          </div>
-          <div class="field">
-            <div class="lab">Points per match<small>Play to this total; more points wins</small></div>
-            <div class="stepper" data-step="pointTarget"><button data-d="-1">−</button><span class="val tnum" id="ptVal">24</span><button data-d="1">+</button></div>
-          </div>
-          <div class="field">
-            <div class="lab">Rounds per day<small id="rdSub">Max 7 — everyone partners everyone once</small></div>
-            <div class="stepper" data-step="defaultRounds"><button data-d="-1">−</button><span class="val tnum" id="rdVal">6</span><button data-d="1">+</button></div>
-          </div>
+          <div class="field"><div class="lab">Tournament setup<small>Players, courts, format, points, rounds</small></div><button class="btn btn-ghost btn-sm" id="openSetupBtn">Open</button></div>
           <div class="field" style="border-bottom:none">
             <div class="lab">Wooden Spoon<small>Cheeky last-place callout on the shared recap</small></div>
             <button class="btn btn-ghost btn-sm" id="spoonBtn" style="min-width:64px">On</button>
@@ -2812,6 +2812,38 @@ body[data-role="scorekeeper"] .need-admin{display:none !important;}
     <button class="btn btn-ghost" id="inviteClose" style="margin-top:8px">Done</button>
   </div>
 </div>
+<div class="modal-back" id="setupBack">
+  <div class="modal setup-modal">
+    <h3 class="setup-h">Tournament setup</h3>
+    <div class="card" style="margin-bottom:12px">
+      <div class="field">
+        <div class="lab">Players<small id="suPlayersSub">4 to 16</small></div>
+        <div class="stepper" id="suPlayers"><button data-d="-1">&minus;</button><span class="val tnum" id="suPlayersVal">8</span><button data-d="1">+</button></div>
+      </div>
+      <div class="field" style="border-bottom:none">
+        <div class="lab">Courts<small id="suCourtsSub"></small></div>
+        <div class="stepper" id="suCourts"><button data-d="-1">&minus;</button><span class="val tnum" id="suCourtsVal">2</span><button data-d="1">+</button></div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:12px">
+      <div class="field" style="display:block">
+        <div class="lab" style="margin-bottom:9px">Format<small id="modeSub">How each round's pairings are decided</small></div>
+        <div class="seg" id="modeSeg" style="margin-bottom:0"><button data-mode="americano">Americano</button><button data-mode="mexicano">Mexicano</button></div>
+      </div>
+      <div class="field">
+        <div class="lab">Points per match<small>Play to this total; more points wins</small></div>
+        <div class="stepper" data-step="pointTarget"><button data-d="-1">&minus;</button><span class="val tnum" id="ptVal">24</span><button data-d="1">+</button></div>
+      </div>
+      <div class="field" style="border-bottom:none">
+        <div class="lab">Rounds<small id="rdSub">How many rounds to play</small></div>
+        <div class="stepper" data-step="defaultRounds"><button data-d="-1">&minus;</button><span class="val tnum" id="rdVal">6</span><button data-d="1">+</button></div>
+      </div>
+    </div>
+    <div class="setup-summary" id="setupSummary"></div>
+    <button class="btn btn-primary" id="setupGenerate">Generate schedule</button>
+    <div class="row2" style="margin-top:8px"><button class="btn btn-ghost" id="setupInvite">Invite players</button><button class="btn btn-ghost" id="setupClose">Done</button></div>
+  </div>
+</div>
 <script>
 /* ============================================================
    CONFIG  —  EDIT THESE TWO BLOCKS, then re-upload the file.
@@ -2843,10 +2875,11 @@ let whoPrompted = false;  // session guard for the first-run name prompt
 let cloud = false, db = null, docRef = null, docExists = false, pushTimer = null;
 
 function newSession(n){ return { id:'s'+Date.now()+Math.floor(Math.random()*1000), name:'Day '+n, created:Date.now(), rounds:[] }; }
-function defaultTour(){
+function defaultTour(count){
+  const n=Math.max(4,Math.min(16, count||PLAYER_COUNT));
   return { schema:2,
-    players:Array.from({length:PLAYER_COUNT},(_,i)=>({id:'p'+(i+1),name:'Player '+(i+1)})),
-    settings:{pointTarget:24, defaultRounds:6, mode:'americano', recapSpoon:true},
+    players:Array.from({length:n},(_,i)=>({id:'p'+(i+1),name:'Player '+(i+1)})),
+    settings:{pointTarget:24, defaultRounds:6, mode:'americano', recapSpoon:true, courts:Math.floor(n/4)},
     sessions:[newSession(1)], currentSessionId:null };
 }
 function ensureSession(){
@@ -2854,7 +2887,7 @@ function ensureSession(){
   if(!T.currentSessionId || !T.sessions.find(s=>s.id===T.currentSessionId)) T.currentSessionId=T.sessions[T.sessions.length-1].id;
 }
 function currentSession(){ return T.sessions.find(s=>s.id===T.currentSessionId) || T.sessions[T.sessions.length-1]; }
-function playerName(id){ const p=T.players.find(x=>x.id===id); return p?p.name:'?'; }
+function playerName(id){ let p=T.players.find(x=>x.id===id); if(!p && T._retired) p=T._retired.find(x=>x.id===id); return p?p.name:'?'; }
 
 /* ---- permissions ---- */
 function canScore(){ return !cloud || L.role==='scorekeeper' || L.role==='admin'; }
@@ -2924,14 +2957,14 @@ function scheduleCloudPush(){ if(cloud){ clearTimeout(pushTimer); pushTimer=setT
 function commit(){ cacheTour(); scheduleCloudPush(); }
 
 /* ---- create / join / leave ---- */
-async function createTournament(name){
+async function createTournament(name,count){
   const code = await uniqueCode();
   TID = code; setStoredTID(code);
-  T = defaultTour(); T.name = (name&&name.trim()) || 'Padel night';
+  T = defaultTour(count); T.name = (name&&name.trim()) || 'Padel night';
   bindTID(); L.roles=L.roles||{}; L.roles[code]='admin'; L.role='admin';
   ensureSession(); pushRecent(code, T.name); saveLocal(); cacheTour();
   if(cloud && db){ try{ await db.collection('tournaments').doc(code).set({ tour:T, name:T.name, code, createdAt:Date.now(), updatedAt:Date.now(), schema:2 }); }catch(e){} }
-  attachTournament(code); enterApp(); openInvite(); toast('Tournament created');
+  attachTournament(code); enterApp(); openSetup(); toast('Tournament created');
 }
 async function joinTournament(raw){
   const v=(raw||'').trim(); if(!v){ toast('Enter a code'); return false; }
@@ -2988,24 +3021,102 @@ function factorization(n){
   return rounds;
 }
 function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
-function generateSchedule(numRounds){
-  const n=PLAYER_COUNT, fac=factorization(n), perm=shuffle(T.players.map(p=>p.id)), opp={}, ok=(a,b)=>a<b?a+'|'+b:b+'|'+a, rounds=[];
-  for(let r=0;r<numRounds;r++){
-    const pairs=fac[r].map(([a,b])=>[perm[a],perm[b]]);
-    const splits=[[[0,1],[2,3]],[[0,2],[1,3]],[[0,3],[1,2]]]; let best=null,bestCost=Infinity; shuffle(splits);
-    for(const s of splits){ let cost=0;
-      for(const [x,y] of s){ const [a,b]=pairs[x],[c,d]=pairs[y];
-        cost+=(opp[ok(a,c)]||0)+(opp[ok(a,d)]||0)+(opp[ok(b,c)]||0)+(opp[ok(b,d)]||0); }
-      if(cost<bestCost){bestCost=cost;best=s;} }
-    const matches=[];
-    best.forEach(([x,y],ci)=>{ let teamA=pairs[x].slice(), teamB=pairs[y].slice();
-      [[teamA[0],teamB[0]],[teamA[0],teamB[1]],[teamA[1],teamB[0]],[teamA[1],teamB[1]]].forEach(([p,q])=>{opp[ok(p,q)]=(opp[ok(p,q)]||0)+1;});
-      if(Math.random()<.5)[teamA,teamB]=[teamB,teamA];
-      matches.push({ id:'m'+r+'_'+ci, court:ci+1, teamA, teamB, scoreA:null, scoreB:null, done:false }); });
-    rounds.push({ n:r+1, matches });
-  }
-  return rounds;
+
+/* ---- variable-N helpers: courts auto-derive, byes rotate fairly ---- */
+function maxCourts(n){ return Math.floor(n/4); }
+function courtsFor(n){ const mc=maxCourts(n); const c=(T.settings&&T.settings.courts)||mc; return Math.max(1,Math.min(mc,c)); }
+function byesFor(n){ return n - courtsFor(n)*4; }
+function _pk(a,b){ return a<b ? a+'|'+b : b+'|'+a; }
+function _bump(map,a,b){ const k=_pk(a,b); map[k]=(map[k]||0)+1; }
+function _cnt(map,a,b){ return map[_pk(a,b)]||0; }
+function statsFromRounds(rounds){
+  const gp={}, partner={}, opp={};
+  rounds.forEach(rd=>rd.matches.forEach(m=>{
+    [m.teamA[0],m.teamA[1],m.teamB[0],m.teamB[1]].forEach(id=>gp[id]=(gp[id]||0)+1);
+    _bump(partner,m.teamA[0],m.teamA[1]); _bump(partner,m.teamB[0],m.teamB[1]);
+    m.teamA.forEach(a=>m.teamB.forEach(b=>_bump(opp,a,b)));
+  }));
+  return {gp,partner,opp};
 }
+function byesOfRound(round, ids){ return ids.filter(id=>!round.matches.some(m=>m.teamA.indexOf(id)>=0||m.teamB.indexOf(id)>=0)); }
+function pickByes(ids, gp, byesN, prevByes){
+  if(byesN<=0) return [];
+  const arr=ids.map(id=>({id, gp:gp[id]||0, rl:prevByes.indexOf(id)>=0?1:0, rnd:Math.random()}));
+  arr.sort((a,b)=> (b.gp-a.gp) || (a.rl-b.rl) || (a.rnd-b.rnd));   // most-played sit; avoid back-to-back; else random
+  return arr.slice(0,byesN).map(x=>x.id);
+}
+function pairByVariety(playing, partner, gp){
+  const pool=shuffle(playing.slice()), pairs=[];
+  while(pool.length){ const a=pool.shift();
+    let bi=0, bc=Infinity;
+    for(let i=0;i<pool.length;i++){ const c=_cnt(partner,a,pool[i])*100 + (gp[pool[i]]||0); if(c<bc){ bc=c; bi=i; } }
+    pairs.push([a, pool.splice(bi,1)[0]]);
+  }
+  return pairs;
+}
+function courtsByOpp(pairs, opp){
+  const used=new Array(pairs.length).fill(false), out=[];
+  for(let x=0;x<pairs.length;x++){ if(used[x])continue; used[x]=true;
+    let by=-1, bc=Infinity;
+    for(let y=x+1;y<pairs.length;y++){ if(used[y])continue;
+      const [a,b]=pairs[x],[c,d]=pairs[y];
+      const cost=_cnt(opp,a,c)+_cnt(opp,a,d)+_cnt(opp,b,c)+_cnt(opp,b,d);
+      if(cost<bc){ bc=cost; by=y; } }
+    if(by<0) break;
+    used[by]=true; out.push({A:pairs[x].slice(), B:pairs[by].slice()});
+  }
+  return out;
+}
+function mexTeams(rankedPlaying){
+  const out=[];
+  for(let c=0;c<rankedPlaying.length/4;c++){ const g=rankedPlaying.slice(c*4,c*4+4);
+    out.push({A:[g[0],g[3]], B:[g[1],g[2]]}); }   // 1&4 vs 2&3
+  return out;
+}
+function packMatches(teamPairs, rIdx){
+  return teamPairs.map((tp,ci)=>{ let A=tp.A.slice(), B=tp.B.slice(); if(Math.random()<.5){ const t=A; A=B; B=t; }
+    return { id:'m'+rIdx+'_'+ci, court:ci+1, teamA:A, teamB:B, scoreA:null, scoreB:null, done:false }; });
+}
+/* one round for either mode, given the rounds already built (accum) for fairness/variety stats */
+function buildRound(rIdx, mode, accum){
+  const ids=T.players.map(p=>p.id), N=ids.length, byesN=byesFor(N);
+  const {gp,partner,opp}=statsFromRounds(accum);
+  const prevByes = accum.length ? byesOfRound(accum[accum.length-1], ids) : [];
+  const byes=pickByes(ids, gp, byesN, prevByes);
+  const playing=ids.filter(id=>byes.indexOf(id)<0);
+  let teamPairs;
+  if(mode==='mexicano'){
+    const {ind}=computeStandings('session');
+    const ranked=rankSort(playing.map(id=>({id, ...(ind[id]||blankInd())}))).map(x=>x.id);
+    teamPairs=mexTeams(ranked);
+  } else {
+    teamPairs=courtsByOpp(pairByVariety(playing, partner, gp), opp);
+  }
+  return { n:rIdx+1, matches:packMatches(teamPairs, rIdx) };
+}
+
+/* ---- Americano: full schedule upfront ----
+   N divisible by 4 -> circle method gives perfect partner rotation for the first N-1 rounds
+   (everyone partners everyone once); any extra rounds + all non-multiples-of-4 use the fair builder. */
+function americanoCircle(numRounds){
+  const ids=T.players.map(p=>p.id), N=ids.length, perm=shuffle(ids.slice()), fac=factorization(N), accum=[];
+  const perfect=Math.min(numRounds, fac.length);
+  for(let r=0;r<perfect;r++){
+    const pairs=fac[r].map(([a,b])=>[perm[a],perm[b]]);
+    const {opp}=statsFromRounds(accum);
+    accum.push({ n:r+1, matches:packMatches(courtsByOpp(pairs, opp), r) });
+  }
+  for(let r=perfect;r<numRounds;r++) accum.push(buildRound(r,'americano',accum));
+  return accum;
+}
+function generateSchedule(numRounds){
+  const N=T.players.length;
+  if(N%4===0 && courtsFor(N)===maxCourts(N)) return americanoCircle(numRounds);
+  const accum=[]; for(let r=0;r<numRounds;r++) accum.push(buildRound(r,'americano',accum)); return accum;
+}
+
+/* ---- Mexicano: round 1 random (no standings yet), then drawn from standings ---- */
+/* schedule engine (variable N) is defined above */
 
 /* ============================================================
    SCORING (3 / 1 / 0)
@@ -3259,24 +3370,19 @@ function teamLine(m,side,win,loss,editable){
 }
 function doGenerate(){ const ses=currentSession();
   if(T.settings.mode==='mexicano'){ ses.rounds=[ randomRound(0) ]; commit(); render(); toast('Round 1 ready'); }
-  else { ses.rounds=generateSchedule(Math.min(T.settings.defaultRounds,MAX_ROUNDS)); commit(); render(); toast('Schedule ready · '+ses.rounds.length+' rounds'); }
+  else { ses.rounds=generateSchedule(T.settings.defaultRounds); commit(); render(); toast('Schedule ready · '+ses.rounds.length+' rounds'); }
 }
 function doClearSchedule(){ const ses=currentSession(); ses.rounds=[]; commit(); render(); toast('Schedule cleared'); }
 
-/* ---- Mexicano: dynamic, standings-driven rounds ---- */
+/* ---- Mexicano: dynamic, standings-driven rounds (variable N + fair byes) ---- */
 function randomRound(r){
-  const ids=shuffle(T.players.map(p=>p.id)), matches=[];
-  for(let c=0;c<PLAYER_COUNT/4;c++){ const g=ids.slice(c*4,c*4+4);
-    matches.push({id:'m'+r+'_'+c,court:c+1,teamA:[g[0],g[1]],teamB:[g[2],g[3]],scoreA:null,scoreB:null,done:false}); }
+  const ids=shuffle(T.players.map(p=>p.id)), byesN=byesFor(ids.length), courts=courtsFor(ids.length);
+  const playing=ids.slice(byesN), matches=[];
+  for(let c=0;c<courts;c++){ const g=playing.slice(c*4,c*4+4);
+    matches.push({ id:'m'+r+'_'+c, court:c+1, teamA:[g[0],g[1]], teamB:[g[2],g[3]], scoreA:null, scoreB:null, done:false }); }
   return { n:r+1, matches };
 }
-function mexicanoRound(r){
-  const {ind}=computeStandings('session');
-  const ranked=rankSort(T.players.map(p=>({id:p.id,...ind[p.id]}))).map(x=>x.id), matches=[];
-  for(let c=0;c<PLAYER_COUNT/4;c++){ const g=ranked.slice(c*4,c*4+4);   // top-4 on court 1, etc.
-    matches.push({id:'m'+r+'_'+c,court:c+1,teamA:[g[0],g[3]],teamB:[g[1],g[2]],scoreA:null,scoreB:null,done:false}); }
-  return { n:r+1, matches };                                            // pair 1&4 vs 2&3 for balance
-}
+function mexicanoRound(r){ return buildRound(r,'mexicano', currentSession().rounds.slice(0,r)); }
 function ensureNextMexicanoRound(){
   if(T.settings.mode!=='mexicano') return;
   const ses=currentSession(); if(!ses.rounds.length) return;
@@ -3301,11 +3407,15 @@ function renderNow(){
     ? `<b>Mexicano</b> · pairings are set by the standings each round`
     : `<b>Americano</b> · you partner someone new every round`;
   body.appendChild(cap);
+  { const N=T.players.length, c=courtsFor(N), b=byesFor(N);
+    const cl=el('div','court-line'); cl.textContent = N+' players · '+c+' court'+(c>1?'s':'')+(b?(' · '+b+' resting each round'):'');
+    if(canAdmin()){ cl.classList.add('tap'); cl.textContent+='  · setup'; cl.onclick=openSetup; }
+    body.appendChild(cl); }
   if(!ses.rounds.length){
     if(canAdmin()){ body.appendChild(emptyState('Ready to start', T.settings.mode==='mexicano'
         ? `Generate round 1 — after that, each round is drawn from the standings.`
         : `Generate ${T.settings.defaultRounds} rounds and the first matches show up right here.`));
-      const gen=el('button','btn btn-primary','⚡  Generate schedule'); gen.onclick=doGenerate; body.appendChild(gen); }
+      const gen=el('button','btn btn-primary','⚙  Set up & generate'); gen.onclick=openSetup; body.appendChild(gen); }
     else body.appendChild(emptyState('Waiting to start','The organizer will set the draw — your first match appears here automatically.'));
     return;
   }
@@ -3315,6 +3425,8 @@ function renderNow(){
   $('#nowHint').textContent=`Round ${rnd.n} of ${ses.rounds.length}`;
   const prog=el('div','now-prog'); prog.innerHTML=`<span class="rnum">ROUND ${rnd.n}</span><span class="bar"><i style="width:${total?Math.round(done/total*100):0}%"></i></span><span class="ct">${done}/${total} in</span>`;
   body.appendChild(prog);
+  { const ids=T.players.map(p=>p.id), resting=byesOfRound(rnd, ids);
+    if(resting.length){ const rl=el('div','resting-line'); rl.innerHTML='<b>Resting:</b> '+resting.map(id=>esc(playerName(id))).join(', '); body.appendChild(rl); } }
   if(L.me){
     const mine=rnd.matches.find(m=>m.teamA.includes(L.me)||m.teamB.includes(L.me));
     if(mine){ const onA=mine.teamA.includes(L.me), partner=(onA?mine.teamA:mine.teamB).find(x=>x!==L.me), opp=onA?mine.teamB:mine.teamA;
@@ -3530,6 +3642,10 @@ function openWho(){
 function renderPlayers(){
   const list=$('#playerList'); list.innerHTML='';
   $('#playersHint').textContent = canAdmin()?'Tap to rename':'';
+  { const card=$('#playerCountCard'); if(card) card.style.display = canAdmin() ? '' : 'none';
+    const n=T.players.length, c=courtsFor(n), b=byesFor(n);
+    const pv=$('#pcVal'); if(pv) pv.textContent=n;
+    const ps=$('#pcSub'); if(ps) ps.textContent = c+' court'+(c>1?'s':'')+(b?(' \u00b7 '+b+' resting/round'):' \u00b7 everyone plays'); }
   T.players.forEach((p,i)=>{
     const row=el('div','player-row'); row.innerHTML=`<div class="pnum tnum">${i+1}</div>`;
     if(canAdmin()){
@@ -3542,12 +3658,7 @@ function renderPlayers(){
 }
 
 function renderMore(){
-  $('#ptVal').textContent=T.settings.pointTarget;
-  $('#rdVal').textContent=T.settings.defaultRounds;
-  const mode=T.settings.mode||'americano';
-  document.querySelectorAll('#modeSeg button').forEach(b=>b.classList.toggle('on',b.dataset.mode===mode));
-  const ms=$('#modeSub'); if(ms) ms.textContent = mode==='mexicano' ? 'Pairings set by the live standings each round' : 'Fixed draw — everyone partners everyone';
-  const rs=$('#rdSub'); if(rs) rs.textContent = mode==='mexicano' ? 'How many rounds to play' : 'Max 7 — everyone partners everyone once';
+  /* tournament-shape settings live in the Setup sheet (renderSetup) */
   const sb=$('#spoonBtn'); if(sb) sb.textContent = (T.settings.recapSpoon!==false) ? 'On' : 'Off';
   { const tn=$('#tourName'); if(tn) tn.textContent=(T&&T.name)||'Padel night'; const tc=$('#tourCode'); if(tc) tc.textContent= TID ? ('Code '+TID) : 'Local'; }
   renderAccess();
@@ -3622,15 +3733,41 @@ document.querySelectorAll('#scopeRow button').forEach(b=>b.onclick=()=>{L.scope=
 document.querySelectorAll('#modeSeg button').forEach(b=>b.onclick=()=>{ if(!canAdmin())return;
   const mode=b.dataset.mode; if(mode===(T.settings.mode||'americano')) return;
   const ses=currentSession(), played=ses.rounds.some(r=>r.matches.some(m=>m.done));
-  const apply=()=>{ T.settings.mode=mode; ses.rounds=[]; commit(); render(); toast(mode==='mexicano'?'Mexicano mode':'Americano mode'); };
+  const apply=()=>{ T.settings.mode=mode; ses.rounds=[]; commit(); render(); renderSetup(); toast(mode==='mexicano'?'Mexicano mode':'Americano mode'); };
   if(played) confirmModal('Switch to '+(mode==='mexicano'?'Mexicano':'Americano')+'?','This clears the current draw and its results so you can start fresh in the new format.',apply);
   else apply();
 });
 { const sb=$('#spoonBtn'); if(sb) sb.onclick=()=>{ if(!canAdmin())return; T.settings.recapSpoon = (T.settings.recapSpoon===false); commit(); renderMore(); }; }
-document.querySelectorAll('.stepper').forEach(st=>{ const key=st.dataset.step;
-  st.querySelectorAll('button').forEach(btn=>btn.onclick=()=>{ if(!canAdmin())return; const d=+btn.dataset.d; let v=T.settings[key]+d;
-    if(key==='pointTarget') v=Math.max(8,Math.min(48,v)); if(key==='defaultRounds') v=Math.max(1,Math.min(MAX_ROUNDS,v));
-    T.settings[key]=v; commit(); renderMore(); }); });
+document.querySelectorAll('.stepper').forEach(st=>{ const key=st.dataset.step; if(!key) return;
+  st.querySelectorAll('button').forEach(btn=>btn.onclick=()=>{ if(!canAdmin())return; const d=+btn.dataset.d; let v=(T.settings[key]||0)+d;
+    if(key==='pointTarget') v=Math.max(8,Math.min(48,v)); if(key==='defaultRounds') v=Math.max(1,Math.min(20,v));
+    T.settings[key]=v; commit(); renderSetup(); }); });
+function renderSetup(){
+  if(!T) return;
+  const N=T.players.length, mc=maxCourts(N), courts=courtsFor(N), b=byesFor(N), mode=T.settings.mode||'americano';
+  const set=(id,v)=>{ const e=$('#'+id); if(e) e.textContent=v; };
+  set('suPlayersVal',N); set('suCourtsVal',courts); set('suPlayersSub','4 to 16');
+  set('suCourtsSub', mc>1 ? ('1 to '+mc) : 'one court max');
+  set('ptVal',T.settings.pointTarget); set('rdVal',T.settings.defaultRounds);
+  document.querySelectorAll('#modeSeg button').forEach(bt=>bt.classList.toggle('on',bt.dataset.mode===mode));
+  const ms=$('#modeSub'); if(ms) ms.textContent = mode==='mexicano' ? 'Pairings set by the live standings each round' : 'Fixed draw — partners rotate every round';
+  const rs=$('#rdSub'); if(rs) rs.textContent = (mode==='americano'&&N%4===0&&courts===mc) ? ('Up to '+(N-1)+' keep partners unique') : 'How many rounds to play';
+  const sum=$('#setupSummary'); if(sum) sum.innerHTML = '<b>'+N+'</b> players · <b>'+courts+'</b> court'+(courts>1?'s':'')+' · '+(b?('<b>'+b+'</b> resting each round'):'everyone plays');
+}
+function openSetup(){ if(!canAdmin()){ toast('Only the organiser can change setup'); return; } renderSetup(); $('#setupBack').classList.add('show'); }
+function setCourts(c){ const N=T.players.length, mc=maxCourts(N); c=Math.max(1,Math.min(mc,c)); if(courtsFor(N)===c) return;
+  const apply=()=>{ T.settings.courts=c; currentSession().rounds=[]; commit(); render(); renderSetup(); toast(c+' court'+(c>1?'s':'')); };
+  if(currentSession().rounds.length) confirmModal('Change courts?','This clears the current draw so it can be rebuilt for '+c+' court'+(c>1?'s':'')+'. Past days are kept.', apply); else apply();
+}
+{ const b=$('#openSetupBtn'); if(b) b.onclick=openSetup; }
+{ const b=$('#setupClose'); if(b) b.onclick=()=>$('#setupBack').classList.remove('show'); }
+{ const b=$('#setupBack'); if(b) b.onclick=e=>{ if(e.target===b) b.classList.remove('show'); }; }
+{ const b=$('#setupInvite'); if(b) b.onclick=()=>{ $('#setupBack').classList.remove('show'); openInvite(); }; }
+{ const b=$('#setupGenerate'); if(b) b.onclick=()=>{ if(!canAdmin())return;
+    const go=()=>{ doGenerate(); $('#setupBack').classList.remove('show'); switchTab('now'); };
+    if(currentSession().rounds.some(r=>r.matches.some(m=>m.done))) confirmModal('Regenerate schedule?','This clears the current draw and its results for this day.', go); else go(); }; }
+{ const st=$('#suPlayers'); if(st) st.querySelectorAll('button').forEach(btn=>btn.onclick=()=>{ if(!canAdmin())return; setPlayerCount(T.players.length+(+btn.dataset.d)); }); }
+{ const st=$('#suCourts'); if(st) st.querySelectorAll('button').forEach(btn=>btn.onclick=()=>{ if(!canAdmin())return; setCourts(courtsFor(T.players.length)+(+btn.dataset.d)); }); }
 $('#newDayBtn').onclick=()=>{ if(!canAdmin())return; const n=T.sessions.length+1; const s=newSession(n);
   T.sessions.push(s); T.currentSessionId=s.id; commit(); switchTab('schedule'); render(); toast('Started '+s.name); };
 $('#exportBtn').onclick=()=>{ const blob=new Blob([JSON.stringify(T,null,2)],{type:'application/json'});
@@ -3652,6 +3789,17 @@ $('#whoBack').onclick=e=>{ if(e.target===$('#whoBack')) $('#whoBack').classList.
 { const b=document.getElementById('lbCreateCancel'); if(b) b.onclick=()=>{ const c=document.getElementById('lbCreate'); if(c)c.hidden=true; }; }
 { const b=document.getElementById('lbJoinCancel'); if(b) b.onclick=()=>{ const j=document.getElementById('lbJoin'); if(j)j.hidden=true; }; }
 { const b=document.getElementById('lbCreateGo'); if(b) b.onclick=()=>{ const n=document.getElementById('lbName'); createTournament(n?n.value:''); }; }
+function setPlayerCount(n){
+  n=Math.max(4,Math.min(16,n)); const cur=T.players.length; if(n===cur) return;
+  const apply=()=>{
+    if(n>cur){ for(let i=cur;i<n;i++) T.players.push({id:'p'+Date.now().toString(36)+i, name:'Player '+(i+1)}); }
+    else { const drop=T.players.slice(n); T._retired=(T._retired||[]).concat(drop); if(L.me && drop.some(p=>p.id===L.me)){ L.me=null; saveLocal(); } T.players=T.players.slice(0,n); }
+    T.settings.courts=Math.min((T.settings.courts||maxCourts(n)), maxCourts(n)); currentSession().rounds=[]; commit(); render(); renderSetup(); toast(n+' players');
+  };
+  if(currentSession().rounds.length) confirmModal('Change player count?','This clears the current draw so it can be rebuilt for '+n+' players. Past days are kept.', apply);
+  else apply();
+}
+{ const step=document.getElementById('pcStep'); if(step) step.querySelectorAll('button').forEach(btn=>btn.onclick=()=>{ if(!canAdmin())return; setPlayerCount(T.players.length+(+btn.dataset.d)); }); }
 { const b=document.getElementById('lbJoinGo'); if(b) b.onclick=()=>{ const n=document.getElementById('lbCode'); joinTournament(n?n.value:''); }; }
 { const n=document.getElementById('lbCode'); if(n) n.addEventListener('keydown',e=>{ if(e.key==='Enter') joinTournament(n.value); }); }
 { const n=document.getElementById('lbName'); if(n) n.addEventListener('keydown',e=>{ if(e.key==='Enter') createTournament(n.value); }); }
