@@ -2610,6 +2610,11 @@ body[data-role="scorekeeper"] .need-admin{display:none !important;}
 .setup-summary{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;text-align:center;color:var(--txt-dim,#97a1ad);font-size:14px;margin-bottom:14px;}
 .setup-summary b{color:var(--accent);font-weight:800;}
 .court-line.tap{cursor:pointer;}
+.btn-danger{color:#ff6f6f;}
+.lobby-recent-row{display:flex;align-items:stretch;gap:8px;margin-bottom:6px;}
+.lobby-recent-row .lobby-recent{flex:1;margin-bottom:0;}
+.lobby-recent-x{width:46px;flex:0 0 46px;border-radius:12px;background:var(--surface);color:var(--txt-faint,#66707c);font-size:20px;font-weight:700;display:grid;place-items:center;}
+.lobby-recent-x:active{background:var(--line);color:var(--txt);}
 </style>
 </head>
 <body>
@@ -2702,6 +2707,7 @@ body[data-role="scorekeeper"] .need-admin{display:none !important;}
           <button class="btn btn-ghost btn-sm" id="inviteBtn">Invite</button>
         </div>
         <button class="btn btn-ghost" id="switchBtn" style="margin-top:8px">Switch tournament</button>
+        <button class="btn btn-ghost btn-danger" id="deleteBtn" style="margin-top:8px;display:none">Delete tournament</button>
       </div>
 
       <div id="accessSection"></div>
@@ -2980,6 +2986,18 @@ async function joinTournament(raw){
   attachTournament(found); enterApp(); toast('Joined'); return true;
 }
 function leaveTournament(){ if(unsub){ try{ unsub(); }catch(e){} unsub=null; } docRef=null; docExists=false; clearStoredTID(); TID=null; T=null; showLobby(); }
+function forgetRecent(code){
+  try{ localStorage.setItem('pm_recent', JSON.stringify(getRecents().filter(x=>x.code!==code))); }catch(e){}
+  try{ localStorage.removeItem(CACHE_KEY+':'+code); }catch(e){}
+  if(L.roles) delete L.roles[code]; if(L.mes) delete L.mes[code]; if(L.askedWhos) delete L.askedWhos[code]; saveLocal();
+}
+function deleteTournament(){
+  const code=TID;
+  if(unsub){ try{ unsub(); }catch(e){} unsub=null; }            // stop listener first so it can't re-seed the doc
+  if(cloud && db && code){ try{ db.collection('tournaments').doc(code).delete(); }catch(e){} }
+  forgetRecent(code);
+  docRef=null; docExists=false; clearStoredTID(); TID=null; T=null; showLobby(); toast('Tournament deleted');
+}
 
 /* ---- lobby / app shell ---- */
 function enterApp(){ hideLobby(); updateHeaderName(); render(); switchTab(L.tab||'now'); }
@@ -2992,7 +3010,12 @@ function hideLobby(){ const lb=document.getElementById('lobby'); if(lb) lb.hidde
 function renderLobbyRecents(){ const w=document.getElementById('lobbyRecent'); if(!w) return; w.innerHTML='';
   const r=getRecents(); if(!r.length) return;
   const t=document.createElement('div'); t.className='lobby-recent-t'; t.textContent='Recent'; w.appendChild(t);
-  r.forEach(x=>{ const b=el('button','lobby-recent'); b.innerHTML='<span>'+esc(x.name)+'</span><span class="lr-code">'+esc(x.code)+'</span>'; b.onclick=()=>joinTournament(x.code); w.appendChild(b); });
+  r.forEach(x=>{ const row=el('div','lobby-recent-row');
+    const b=el('button','lobby-recent'); b.innerHTML='<span>'+esc(x.name)+'</span><span class="lr-code">'+esc(x.code)+'</span>'; b.onclick=()=>joinTournament(x.code);
+    const xb=el('button','lobby-recent-x','\u00d7'); xb.setAttribute('aria-label','Remove from this device');
+    xb.onclick=(e)=>{ e.stopPropagation(); confirmModal('Remove from this device?','\u201c'+esc(x.name)+'\u201d stays available to everyone else \u2014 you can rejoin any time with code '+esc(x.code)+'.', ()=>{ forgetRecent(x.code); renderLobbyRecents(); }); };
+    row.appendChild(b); row.appendChild(xb); w.appendChild(row);
+  });
 }
 function updateHeaderName(){ const s=document.getElementById('brandSub'); if(s) s.textContent=(T&&T.name)?T.name:'Tournament tracker'; }
 
@@ -3660,7 +3683,7 @@ function renderPlayers(){
 function renderMore(){
   /* tournament-shape settings live in the Setup sheet (renderSetup) */
   const sb=$('#spoonBtn'); if(sb) sb.textContent = (T.settings.recapSpoon!==false) ? 'On' : 'Off';
-  { const tn=$('#tourName'); if(tn) tn.textContent=(T&&T.name)||'Padel night'; const tc=$('#tourCode'); if(tc) tc.textContent= TID ? ('Code '+TID) : 'Local'; }
+  { const tn=$('#tourName'); if(tn) tn.textContent=(T&&T.name)||'Padel night'; const tc=$('#tourCode'); if(tc) tc.textContent= TID ? ('Code '+TID) : 'Local'; const db_=$('#deleteBtn'); if(db_) db_.style.display = canAdmin() ? '' : 'none'; }
   renderAccess();
   const me=$('#meField');
   if(me){ me.innerHTML=`<div class="lab">You are<small>${L.me?'Following your matches &amp; ranking':'Tap to follow yourself'}</small></div>`;
@@ -3808,6 +3831,7 @@ function setPlayerCount(n){
 { const b=document.getElementById('inviteBack'); if(b) b.onclick=e=>{ if(e.target===b) b.classList.remove('show'); }; }
 { const b=document.getElementById('inviteBtn'); if(b) b.onclick=openInvite; }
 { const b=document.getElementById('switchBtn'); if(b) b.onclick=()=>confirmModal('Switch tournament?','You will leave this one on this device. You can rejoin any time with its code.', leaveTournament); }
+{ const b=document.getElementById('deleteBtn'); if(b) b.onclick=()=>{ if(!canAdmin())return; confirmModal('Delete this tournament?','This permanently erases \u201c'+((T&&T.name)||TID)+'\u201d and all its results for everyone with the code. This cannot be undone.', deleteTournament); }; }
 
 /* ============================================================
    BOOT
