@@ -2609,6 +2609,17 @@ body[data-role="scorekeeper"] .need-admin{display:none !important;}
 .setup-h{font-size:18px;font-weight:800;margin:2px 2px 14px;}
 .setup-summary{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;text-align:center;color:var(--txt-dim,#97a1ad);font-size:14px;margin-bottom:14px;}
 .setup-summary b{color:var(--accent);font-weight:800;}
+.setup-time{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:12px;}
+.st-main{font-size:14px;color:var(--txt);line-height:1.4;} .st-main b{color:var(--accent);font-weight:800;}
+.st-fit{font-size:12.5px;margin-top:6px;color:var(--txt-dim,#97a1ad);}
+.st-fit.over{color:#ffb454;}
+.st-suggest{color:var(--accent);font-weight:700;text-decoration:underline;font-size:12.5px;}
+.st-note{font-size:11px;color:var(--txt-faint,#66707c);margin-top:7px;line-height:1.4;}
+.extend-card{margin-top:14px;padding:14px;}
+.ex-h{font-weight:800;font-size:15px;margin-bottom:2px;}
+.ex-s{font-size:12.5px;color:var(--txt-dim,#97a1ad);margin-bottom:10px;line-height:1.4;}
+.ex-row{display:flex;gap:8px;} .ex-row .btn{flex:1;}
+.add-round{margin-top:14px;}
 .court-line.tap{cursor:pointer;}
 .btn-danger{color:#ff6f6f;}
 .lobby-recent-row{display:flex;align-items:stretch;gap:8px;margin-bottom:6px;}
@@ -2840,10 +2851,19 @@ body[data-role="scorekeeper"] .need-admin{display:none !important;}
         <div class="lab">Points per match<small>Play to this total; more points wins</small></div>
         <div class="stepper" data-step="pointTarget"><button data-d="-1">&minus;</button><span class="val tnum" id="ptVal">24</span><button data-d="1">+</button></div>
       </div>
-      <div class="field" style="border-bottom:none">
+      <div class="field">
         <div class="lab">Rounds<small id="rdSub">How many rounds to play</small></div>
         <div class="stepper" data-step="defaultRounds"><button data-d="-1">&minus;</button><span class="val tnum" id="rdVal">6</span><button data-d="1">+</button></div>
       </div>
+      <div class="field" style="border-bottom:none">
+        <div class="lab">Court time<small>How long you booked — flags overruns</small></div>
+        <div class="stepper" id="suTime"><button data-d="-1">&minus;</button><span class="val tnum" id="suTimeVal">1h 30m</span><button data-d="1">+</button></div>
+      </div>
+    </div>
+    <div class="setup-time" id="setupTime">
+      <div class="st-main" id="stMain"></div>
+      <div class="st-fit" id="stFit"></div>
+      <div class="st-note">Rough estimate at ~25–30s a point — tweak as you learn your group's pace.</div>
     </div>
     <div class="setup-summary" id="setupSummary"></div>
     <button class="btn btn-primary" id="setupGenerate">Generate schedule</button>
@@ -2885,7 +2905,7 @@ function defaultTour(count){
   const n=Math.max(4,Math.min(16, count||PLAYER_COUNT));
   return { schema:2,
     players:Array.from({length:n},(_,i)=>({id:'p'+(i+1),name:'Player '+(i+1)})),
-    settings:{pointTarget:24, defaultRounds:6, mode:'americano', recapSpoon:true, courts:Math.floor(n/4)},
+    settings:{pointTarget:24, defaultRounds:6, mode:'americano', recapSpoon:true, courts:Math.floor(n/4), courtMinutes:90},
     sessions:[newSession(1)], currentSessionId:null };
 }
 function ensureSession(){
@@ -3412,6 +3432,19 @@ function ensureNextMexicanoRound(){
   const target=Math.max(1,T.settings.defaultRounds), last=ses.rounds[ses.rounds.length-1];
   if(last.matches.every(m=>m.done) && ses.rounds.length<target) ses.rounds.push(mexicanoRound(ses.rounds.length));
 }
+function extendTournament(n){
+  if(!canAdmin()) return; n=Math.max(1, n||1);
+  const ses=currentSession(); if(!ses.rounds.length) return;
+  if(T.settings.mode==='mexicano'){
+    T.settings.defaultRounds = ses.rounds.length + n;       // grow target; rest auto-draw as rounds finish
+    ses.rounds.push(mexicanoRound(ses.rounds.length));      // queue the next one now from current standings
+  } else {
+    for(let i=0;i<n;i++) ses.rounds.push(buildRound(ses.rounds.length,'americano', ses.rounds.slice()));
+    T.settings.defaultRounds = ses.rounds.length;
+  }
+  lastCompleteId=null;                                       // allow the win moment to re-fire later
+  commit(); render(); switchTab('now'); toast(n>1?('+'+n+' rounds added'):'Round added');
+}
 
 /* ---- Now screen + you-lens + winner reveal ---- */
 let lastCompleteId=null;
@@ -3471,6 +3504,8 @@ function renderNow(){
     const note=el('div','card'); note.style.padding='14px';
     note.innerHTML='<div style="font-size:13px;color:var(--txt-dim);font-weight:600;line-height:1.5">The next round is drawn from the standings once this one finishes — win to climb into the top group.</div>';
     body.appendChild(note);
+  } else if(canAdmin()){
+    const ex=el('div','add-round'); const b=el('button','btn btn-ghost','＋ Add a round'); b.onclick=()=>extendTournament(1); ex.appendChild(b); body.appendChild(ex);
   }
 }
 function renderWinner(body,ses){
@@ -3488,6 +3523,14 @@ function renderWinner(body,ses){
   wrap.appendChild(pod);
   if(trows.length){ const bd=trows[0]; const rs=el('div','reveal-stat'); rs.innerHTML=`<div class="rs"><div class="k">Best duo of the day</div><div class="v">${esc(bd.name)} · ${bd.pts} pts</div></div>`; wrap.appendChild(rs); }
   body.appendChild(wrap);
+  if(canAdmin()){
+    const ext=el('div','card extend-card');
+    ext.appendChild(el('div','ex-h','Keep the night going'));
+    ext.appendChild(el('div','ex-s','Finished early? Add more rounds — standings carry over.'));
+    const row=el('div','ex-row');
+    [1,2,3].forEach(k=>{ const b=el('button','btn btn-ghost','+'+k); b.onclick=()=>extendTournament(k); row.appendChild(b); });
+    ext.appendChild(row); body.appendChild(ext);
+  }
   const sh=el('button','btn btn-primary','Share recap'); sh.onclick=()=>shareRecap(sh); body.appendChild(sh);
   const vb=el('button','btn btn-ghost','View full standings'); vb.style.marginTop='10px'; vb.onclick=()=>switchTab('standings'); body.appendChild(vb);
   if(canAdmin()){ const nd=el('button','btn btn-ghost','Start a new day'); nd.style.marginTop='10px';
@@ -3765,6 +3808,23 @@ document.querySelectorAll('.stepper').forEach(st=>{ const key=st.dataset.step; i
   st.querySelectorAll('button').forEach(btn=>btn.onclick=()=>{ if(!canAdmin())return; const d=+btn.dataset.d; let v=(T.settings[key]||0)+d;
     if(key==='pointTarget') v=Math.max(8,Math.min(48,v)); if(key==='defaultRounds') v=Math.max(1,Math.min(20,v));
     T.settings[key]=v; commit(); renderSetup(); }); });
+const SEC_PER_POINT=28, ROUND_OVERHEAD_MIN=2.5;
+function minutesPerRound(pts){ return pts*SEC_PER_POINT/60 + ROUND_OVERHEAD_MIN; }
+function fmtDur(mins){ mins=Math.max(0,Math.round(mins)); const h=Math.floor(mins/60), m=mins%60; return h ? (h+'h'+(m?(' '+m+'m'):'')) : (m+'m'); }
+function updateSetupTime(){
+  if(!T) return;
+  const N=T.players.length, c=courtsFor(N), R=T.settings.defaultRounds, pts=T.settings.pointTarget;
+  const per=minutesPerRound(pts), total=per*R, each=Math.round(R*c*4/N);
+  const main=$('#stMain'); if(main) main.innerHTML='\u2248<b>'+Math.round(per)+' min</b>/round \u00b7 '+R+' round'+(R>1?'s':'')+' \u2248 <b>'+fmtDur(total)+'</b> \u00b7 each plays ~'+each;
+  const fitEl=$('#stFit'); if(!fitEl) return; fitEl.innerHTML=''; fitEl.className='st-fit';
+  const court=T.settings.courtMinutes||0; if(court<=0){ fitEl.style.display='none'; return; } fitEl.style.display='';
+  const fits=Math.max(1,Math.floor(court/per));
+  if(R>fits){ fitEl.classList.add('over'); fitEl.appendChild(document.createTextNode('\u2248'+fmtDur(total-court)+' over your '+fmtDur(court)+' booking \u00b7 '));
+    const a=el('button','st-suggest','use '+fits+' rounds'); a.onclick=()=>{ if(!canAdmin())return; T.settings.defaultRounds=fits; commit(); renderSetup(); }; fitEl.appendChild(a);
+  } else { fitEl.classList.add('ok'); const room=fits-R;
+    fitEl.textContent = room>=1 ? ('Fits your '+fmtDur(court)+' booking \u00b7 room for '+room+' more round'+(room>1?'s':'')) : ('Fits your '+fmtDur(court)+' booking');
+  }
+}
 function renderSetup(){
   if(!T) return;
   const N=T.players.length, mc=maxCourts(N), courts=courtsFor(N), b=byesFor(N), mode=T.settings.mode||'americano';
@@ -3776,6 +3836,8 @@ function renderSetup(){
   const ms=$('#modeSub'); if(ms) ms.textContent = mode==='mexicano' ? 'Pairings set by the live standings each round' : 'Fixed draw — partners rotate every round';
   const rs=$('#rdSub'); if(rs) rs.textContent = (mode==='americano'&&N%4===0&&courts===mc) ? ('Up to '+(N-1)+' keep partners unique') : 'How many rounds to play';
   const sum=$('#setupSummary'); if(sum) sum.innerHTML = '<b>'+N+'</b> players · <b>'+courts+'</b> court'+(courts>1?'s':'')+' · '+(b?('<b>'+b+'</b> resting each round'):'everyone plays');
+  set('suTimeVal', T.settings.courtMinutes ? fmtDur(T.settings.courtMinutes) : 'Off');
+  updateSetupTime();
 }
 function openSetup(){ if(!canAdmin()){ toast('Only the organiser can change setup'); return; } renderSetup(); $('#setupBack').classList.add('show'); }
 function setCourts(c){ const N=T.players.length, mc=maxCourts(N); c=Math.max(1,Math.min(mc,c)); if(courtsFor(N)===c) return;
@@ -3791,6 +3853,7 @@ function setCourts(c){ const N=T.players.length, mc=maxCourts(N); c=Math.max(1,M
     if(currentSession().rounds.some(r=>r.matches.some(m=>m.done))) confirmModal('Regenerate schedule?','This clears the current draw and its results for this day.', go); else go(); }; }
 { const st=$('#suPlayers'); if(st) st.querySelectorAll('button').forEach(btn=>btn.onclick=()=>{ if(!canAdmin())return; setPlayerCount(T.players.length+(+btn.dataset.d)); }); }
 { const st=$('#suCourts'); if(st) st.querySelectorAll('button').forEach(btn=>btn.onclick=()=>{ if(!canAdmin())return; setCourts(courtsFor(T.players.length)+(+btn.dataset.d)); }); }
+{ const st=$('#suTime'); if(st) st.querySelectorAll('button').forEach(btn=>btn.onclick=()=>{ if(!canAdmin())return; let v=(T.settings.courtMinutes||0)+(+btn.dataset.d)*15; v=Math.max(0,Math.min(240,v)); T.settings.courtMinutes=v; commit(); renderSetup(); }); }
 $('#newDayBtn').onclick=()=>{ if(!canAdmin())return; const n=T.sessions.length+1; const s=newSession(n);
   T.sessions.push(s); T.currentSessionId=s.id; commit(); switchTab('schedule'); render(); toast('Started '+s.name); };
 $('#exportBtn').onclick=()=>{ const blob=new Blob([JSON.stringify(T,null,2)],{type:'application/json'});
